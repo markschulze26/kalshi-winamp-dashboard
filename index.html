@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#000000" />
+<title>KALSHI WEATHER BOT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+  /* ---------- Base / Reset ---------- */
+  *,
+  *::before,
+  *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; height: 100%; }
+  body {
+    font-family: 'VT323', 'Courier New', monospace;
+    background:
+      radial-gradient(ellipse at center, #1a1f3a 0%, #0a0d1c 70%, #000 100%),
+      #000;
+    color: #00ff66;
+    min-height: 100vh;
+    padding: 12px;
+    -webkit-font-smoothing: none;
+    font-smooth: never;
+    overflow-x: hidden;
+  }
+
+  /* ---------- Winamp Frame ---------- */
+  .winamp {
+    max-width: 480px;
+    margin: 0 auto 14px;
+    background: linear-gradient(180deg, #3a3a3a 0%, #252525 100%);
+    border: 1px solid #000;
+    border-top-color: #6a6a6a;
+    border-left-color: #6a6a6a;
+    border-right-color: #111;
+    border-bottom-color: #111;
+    box-shadow:
+      inset 1px 1px 0 #5a5a5a,
+      inset -1px -1px 0 #1a1a1a,
+      0 4px 0 #000, 0 6px 20px rgba(0,0,0,0.6);
+  }
+  .winamp .titlebar {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 9px;
+    color: #c9c9c9;
+    background: linear-gradient(180deg, #2b4d9c 0%, #152766 100%);
+    padding: 6px 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #000;
+    letter-spacing: 1px;
+  }
+  .winamp .titlebar .dots {
+    display: inline-block;
+    width: 60px;
+    height: 6px;
+    background-image: repeating-linear-gradient(
+      180deg,
+      rgba(255,255,255,0.35) 0 1px,
+      transparent 1px 2px
+    );
+  }
+  .winamp .titlebar .btns span {
+    display: inline-block;
+    width: 10px; height: 10px;
+    background: linear-gradient(180deg,#9a9a9a,#5a5a5a);
+    border: 1px solid #000;
+    margin-left: 2px;
+    font-size: 7px;
+    line-height: 7px;
+    color: #000;
+    text-align: center;
+  }
+
+  /* ---------- Main "Player" Display ---------- */
+  .player-body { padding: 10px 12px 12px; }
+  .lcd {
+    background: #000;
+    border: 1px solid #000;
+    box-shadow:
+      inset 2px 2px 0 #000,
+      inset -1px -1px 0 #222;
+    padding: 8px 10px;
+    font-family: 'VT323', monospace;
+    color: #00ff66;
+    text-shadow: 0 0 5px #00ff66aa, 0 0 2px #00ff66;
+    position: relative;
+    overflow: hidden;
+  }
+  .lcd::before {
+    content: "";
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(0,0,0,0.25) 0 1px,
+      transparent 1px 3px
+    );
+    pointer-events: none;
+  }
+
+  /* Top LCD grid: time left + bitrate-style indicators */
+  .lcd-top {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 10px;
+    align-items: center;
+    font-size: 22px;
+    line-height: 1.1;
+  }
+  .lcd-top .clock {
+    font-size: 30px;
+    color: #00ff00;
+    letter-spacing: 2px;
+  }
+  .lcd-top .nowplaying {
+    font-size: 16px;
+    color: #ffcc00;
+    text-shadow: 0 0 5px #ffcc00aa;
+    white-space: nowrap;
+    overflow: hidden;
+    mask-image: linear-gradient(90deg, transparent 0, #000 12px, #000 calc(100% - 12px), transparent 100%);
+  }
+  .lcd-top .nowplaying span {
+    display: inline-block;
+    padding-left: 100%;
+    animation: scroll 20s linear infinite;
+  }
+  @keyframes scroll {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-100%); }
+  }
+  .lcd-top .rate {
+    font-size: 13px;
+    color: #7a7aff;
+    text-shadow: 0 0 4px #7a7affaa;
+    text-align: right;
+  }
+  .lcd-top .rate b { color: #00ffff; text-shadow: 0 0 4px #00ffffaa; }
+
+  /* Middle LCD row: Portfolio bars + key numbers */
+  .lcd-mid {
+    margin-top: 8px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    align-items: center;
+  }
+  .spectrum {
+    height: 28px;
+    display: grid;
+    grid-template-columns: repeat(20, 1fr);
+    gap: 2px;
+    align-items: end;
+  }
+  .spectrum .bar {
+    background: linear-gradient(180deg, #ff0055 0%, #ffcc00 45%, #00ff66 100%);
+    width: 100%;
+    border-bottom: 1px solid #003300;
+    animation: eqpulse 1.2s ease-in-out infinite alternate;
+  }
+  @keyframes eqpulse {
+    from { height: 20%; opacity: 0.85; }
+    to   { height: 95%; opacity: 1; }
+  }
+  .spectrum .bar:nth-child(odd)  { animation-duration: 0.9s; }
+  .spectrum .bar:nth-child(3n)   { animation-duration: 1.5s; }
+  .spectrum .bar:nth-child(5n)   { animation-duration: 1.1s; }
+  .spectrum .bar:nth-child(7n)   { animation-duration: 1.7s; }
+
+  .big-numbers { text-align: right; }
+  .big-numbers .lbl { font-size: 11px; color: #7a7aff; }
+  .big-numbers .val { font-size: 22px; color: #00ff00; letter-spacing: 1px; }
+
+  /* Bottom LCD row: status chips */
+  .lcd-bot {
+    margin-top: 8px;
+    display: flex; flex-wrap: wrap; gap: 6px;
+    font-size: 12px;
+  }
+  .chip {
+    padding: 2px 6px;
+    border: 1px solid #222;
+    background: #080808;
+    color: #00ff66;
+    text-shadow: 0 0 4px #00ff66aa;
+  }
+  .chip.on   { color: #00ff00; }
+  .chip.warn { color: #ffcc00; text-shadow: 0 0 4px #ffcc00aa; }
+  .chip.dim  { color: #444; text-shadow: none; }
+
+  /* ---------- Equalizer Section (4 cities) ---------- */
+  .winamp.eq .titlebar { background: linear-gradient(180deg, #5a3a1a 0%, #2a1a0a 100%); }
+  .eq-body { padding: 10px 12px; }
+  .eq-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+  }
+  .eq-col {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 6px 4px;
+    background: linear-gradient(180deg, #1c1c1c 0%, #080808 100%);
+    border: 1px solid #000;
+    box-shadow: inset 1px 1px 0 #333, inset -1px -1px 0 #000;
+  }
+  .eq-col .city {
+    font-size: 11px;
+    font-family: 'Press Start 2P', monospace;
+    color: #ffcc00;
+    text-shadow: 0 0 4px #ffcc00aa;
+    margin-bottom: 4px;
+    letter-spacing: 0;
+  }
+  .slider {
+    width: 14px; height: 78px;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.05) 0 1px, transparent 1px) 0 0/ 100% 8px,
+      #050505;
+    position: relative;
+    border: 1px solid #000;
+    box-shadow: inset 1px 1px 0 #111;
+    margin-bottom: 4px;
+  }
+  .slider .thumb {
+    position: absolute;
+    left: -3px; right: -3px;
+    height: 8px;
+    background: linear-gradient(180deg, #ccc 0%, #888 50%, #444 100%);
+    border: 1px solid #000;
+    box-shadow: 0 0 6px rgba(255,255,0,0.4);
+  }
+  .eq-col .side {
+    font-size: 13px;
+    color: #00ff66;
+    text-shadow: 0 0 4px #00ff66aa;
+  }
+  .eq-col .side.no { color: #ff5577; text-shadow: 0 0 4px #ff5577aa; }
+  .eq-col .bracket { font-size: 14px; color: #fff; }
+  .eq-col .outcome {
+    margin-top: 4px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 9px;
+    padding: 3px 5px;
+  }
+  .outcome.open { color: #7a7aff; }
+  .outcome.won  { color: #00ff00; background: #001a00; }
+  .outcome.lost { color: #ff3355; background: #1a0000; }
+
+  /* ---------- Playlist Section (Trades) ---------- */
+  .winamp.pl .titlebar { background: linear-gradient(180deg, #5a5a5a 0%, #222 100%); }
+  .pl-body {
+    padding: 6px 8px 10px;
+    background:
+      radial-gradient(ellipse at top, #1a1f3a 0%, #0a0d1c 100%);
+  }
+  .pl-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 15px;
+    color: #00ff66;
+  }
+  .pl-table thead td {
+    color: #ffcc00;
+    font-size: 12px;
+    padding: 4px 6px;
+    border-bottom: 1px solid #333;
+    text-shadow: 0 0 3px #ffcc00aa;
+  }
+  .pl-table td {
+    padding: 4px 6px;
+    border-bottom: 1px dashed #1a3a1a;
+    font-family: 'VT323', monospace;
+  }
+  .pl-table tbody tr:nth-child(odd) td { background: rgba(255,255,255,0.02); }
+  .pl-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .pl-table .pos { color: #00ff00; text-shadow: 0 0 4px #00ff00aa; }
+  .pl-table .neg { color: #ff3355; text-shadow: 0 0 4px #ff3355aa; }
+  .pl-table .yes { color: #00ff66; }
+  .pl-table .no  { color: #ff8899; }
+
+  /* ---------- Footer / Controls ---------- */
+  .winamp.ctl .titlebar { background: linear-gradient(180deg, #222 0%, #080808 100%); }
+  .ctl-body {
+    padding: 10px 12px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 13px; color: #999;
+  }
+  .ctl-body .refresh-btn {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 9px;
+    color: #000;
+    background: linear-gradient(180deg, #9a9a9a 0%, #5a5a5a 100%);
+    border: 1px solid #000;
+    box-shadow: inset 1px 1px 0 #ccc, inset -1px -1px 0 #222;
+    padding: 6px 10px;
+    cursor: pointer;
+    letter-spacing: 1px;
+  }
+  .ctl-body .refresh-btn:active {
+    box-shadow: inset -1px -1px 0 #ccc, inset 1px 1px 0 #222;
+  }
+  .ctl-body .source {
+    font-family: 'VT323', monospace;
+    font-size: 13px;
+  }
+
+  /* ---------- Mobile ---------- */
+  @media (max-width: 500px) {
+    body { padding: 6px; }
+    .lcd-top .clock { font-size: 24px; }
+    .lcd-top .nowplaying { font-size: 14px; }
+    .big-numbers .val { font-size: 18px; }
+    .eq-col .city { font-size: 9px; }
+    .pl-table { font-size: 13px; }
+    .pl-table thead td { font-size: 11px; }
+    .pl-table td { padding: 3px 4px; }
+    .slider { height: 60px; }
+  }
+
+  /* ---------- Flicker overlay ---------- */
+  .scanlines::after {
+    content: "";
+    position: fixed; inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(0,0,0,0.10) 0 2px,
+      transparent 2px 4px
+    );
+    pointer-events: none;
+    z-index: 9999;
+    mix-blend-mode: multiply;
+  }
+
+  .loading {
+    text-align: center;
+    padding: 20px;
+    color: #ffcc00;
+    font-size: 18px;
+    text-shadow: 0 0 4px #ffcc00aa;
+  }
+</style>
+</head>
+<body class="scanlines">
+
+<!-- ===== MAIN PLAYER ===== -->
+<section class="winamp">
+  <div class="titlebar">
+    <span>KALSHI WEATHER BOT V3</span>
+    <span class="dots"></span>
+    <span class="btns"><span>_</span><span>□</span><span>X</span></span>
+  </div>
+  <div class="player-body">
+    <div class="lcd">
+      <div class="lcd-top">
+        <div class="clock" id="clock">--:--</div>
+        <div class="nowplaying"><span id="nowplaying">BOOTING WEATHER BOT…</span></div>
+        <div class="rate">
+          <div>RUN <b id="run-num">--</b></div>
+          <div><b id="run-mode">---</b> kb</div>
+        </div>
+      </div>
+      <div class="lcd-mid">
+        <div class="spectrum" id="spectrum"></div>
+        <div class="big-numbers">
+          <div class="lbl">PORTFOLIO</div>
+          <div class="val" id="portfolio">$---.--</div>
+        </div>
+      </div>
+      <div class="lcd-bot">
+        <span class="chip on">CASH <b id="cash">$-.--</b></span>
+        <span class="chip warn">POS <b id="positions">$-.--</b></span>
+        <span class="chip" id="pnl-chip">P&amp;L <b id="pnl">$--.--</b></span>
+        <span class="chip dim">OPEN <b id="open-count">-</b></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== EQUALIZER: 4 CITIES ===== -->
+<section class="winamp eq">
+  <div class="titlebar">
+    <span>WEATHER STATIONS</span>
+    <span class="dots"></span>
+    <span class="btns"><span>_</span><span>□</span><span>X</span></span>
+  </div>
+  <div class="eq-body">
+    <div class="eq-grid" id="eq-grid">
+      <div class="loading" style="grid-column: 1/-1;">LOADING STATIONS…</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PLAYLIST: TRADES ===== -->
+<section class="winamp pl">
+  <div class="titlebar">
+    <span>TRADES · PLAYLIST</span>
+    <span class="dots"></span>
+    <span class="btns"><span>_</span><span>□</span><span>X</span></span>
+  </div>
+  <div class="pl-body">
+    <table class="pl-table">
+      <thead>
+        <tr>
+          <td>#</td>
+          <td>CITY</td>
+          <td>BRACKET</td>
+          <td class="num">CTRS</td>
+          <td class="num">COST</td>
+          <td class="num">MAX</td>
+          <td class="num">STATUS</td>
+        </tr>
+      </thead>
+      <tbody id="trade-rows">
+        <tr><td colspan="7" class="loading">LOADING PLAYLIST…</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<section class="winamp ctl">
+  <div class="titlebar">
+    <span>CONTROLS</span>
+    <span class="dots"></span>
+    <span class="btns"><span>_</span><span>□</span><span>X</span></span>
+  </div>
+  <div class="ctl-body">
+    <button class="refresh-btn" onclick="loadData()">⟲ RELOAD</button>
+    <span class="source" id="source">⟩ last: --:--:--</span>
+  </div>
+</section>
+
+<script>
+  // ====== CONFIG ======
+  const SUPABASE_URL = 'https://ywqhpxheoutoufhfizzt.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl3cWhweGhlb3V0b3VmaGZpenp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3NDc0MDEsImV4cCI6MjA5MDMyMzQwMX0.kdEpa-3DU_jDQS8hNpXkKh9BgNazE_Oy_EORRnDBG6A';
+
+  // ====== UI HELPERS ======
+  function $(id) { return document.getElementById(id); }
+  function fmt(v, dec=2) {
+    if (v === null || v === undefined) return '--.--';
+    return Number(v).toFixed(dec);
+  }
+  function usd(v) { return '$' + fmt(v); }
+  function pad(n) { return String(n).padStart(2,'0'); }
+  function hhmm(date) { return pad(date.getHours()) + ':' + pad(date.getMinutes()) + ':' + pad(date.getSeconds()); }
+
+  // Spectrum bars (20 of them, animated via CSS)
+  const spec = $('spectrum');
+  for (let i = 0; i < 20; i++) {
+    const b = document.createElement('div');
+    b.className = 'bar';
+    b.style.height = (20 + Math.random()*70) + '%';
+    b.style.animationDelay = (Math.random() * 1.5) + 's';
+    spec.appendChild(b);
+  }
+
+  // Clock
+  function tickClock() {
+    const d = new Date();
+    $('clock').textContent = pad(d.getHours()) + ':' + pad(d.getMinutes());
+  }
+  tickClock();
+  setInterval(tickClock, 30_000);
+
+  // ====== DATA FETCH ======
+  async function sb(path) {
+    const r = await fetch(SUPABASE_URL + '/rest/v1/' + path, {
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: 'Bearer ' + SUPABASE_KEY,
+      }
+    });
+    if (!r.ok) throw new Error('API ' + r.status);
+    return r.json();
+  }
+
+  async function loadData() {
+    try {
+      const [snap, trades, runs] = await Promise.all([
+        sb('weather_portfolio_snapshots?select=*&order=snapshot_at.desc&limit=1'),
+        sb('weather_trades?select=*&order=opened_at.desc&limit=50'),
+        sb('weather_runs?select=*&order=started_at.desc&limit=1'),
+      ]);
+      renderHeader(snap[0], runs[0]);
+      renderStations(trades);
+      renderPlaylist(trades);
+      $('source').textContent = '⟩ last: ' + hhmm(new Date());
+    } catch (e) {
+      $('nowplaying').textContent = 'CONNECTION ERROR · ' + e.message;
+    }
+  }
+
+  function renderHeader(snap, run) {
+    if (!snap) return;
+    $('portfolio').textContent = usd(snap.portfolio_total_usd);
+    $('cash').textContent = usd(snap.cash_usd);
+    $('positions').textContent = usd(snap.positions_value_usd);
+    $('open-count').textContent = snap.open_positions_count ?? 0;
+
+    const pnl = Number(snap.cumulative_pnl_usd ?? 0);
+    $('pnl').textContent = (pnl >= 0 ? '+$' : '-$') + fmt(Math.abs(pnl));
+    $('pnl-chip').classList.remove('warn');
+    $('pnl-chip').classList.toggle('on', pnl >= 0);
+
+    if (run) {
+      $('run-num').textContent = run.run_number ?? '--';
+      $('run-mode').textContent = (run.run_mode ?? '---').toUpperCase();
+      const when = run.finished_at || run.started_at;
+      const d = new Date(when);
+      $('nowplaying').textContent =
+        'RUN #' + (run.run_number ?? '?') +
+        ' · ' + (run.run_mode ?? '').toUpperCase() +
+        ' · ' + (run.status ?? '') +
+        ' · SCAN=' + (run.scanned_count ?? '?') +
+        ' · PICKS=' + (run.selected_count ?? 0) +
+        ' · BUDGET=' + usd(run.selected_budget_usd ?? 0) +
+        ' · ' + d.toISOString().slice(0,16).replace('T',' ') + ' UTC';
+    }
+  }
+
+  function renderStations(trades) {
+    const grid = $('eq-grid');
+    const cities = ['Denver','Chicago','Miami','LA'];
+    if (!trades.length) {
+      grid.innerHTML = '<div class="loading" style="grid-column:1/-1;">NO STATIONS ACTIVE</div>';
+      return;
+    }
+    const open = trades.filter(t => t.status === 'open');
+    const recent = open.length ? open : trades;
+    // group by city, keep latest per city
+    const byCity = {};
+    for (const t of recent) {
+      if (!byCity[t.city]) byCity[t.city] = t;
+    }
+    grid.innerHTML = '';
+    for (const city of cities) {
+      const t = byCity[city];
+      const col = document.createElement('div');
+      col.className = 'eq-col';
+      if (!t) {
+        col.innerHTML = `
+          <div class="city">${city.toUpperCase()}</div>
+          <div class="slider"><div class="thumb" style="top:45%"></div></div>
+          <div class="side">—</div>
+          <div class="bracket">—</div>
+          <div class="outcome open">IDLE</div>`;
+      } else {
+        // slider thumb position: based on price_cents (0–100)
+        const thumbTop = Math.max(0, Math.min(95, 95 - (t.price_cents || 50)));
+        const statusClass = t.status === 'won' ? 'won' :
+                            t.status === 'lost' ? 'lost' : 'open';
+        const statusTxt = (t.status || 'open').toUpperCase();
+        col.innerHTML = `
+          <div class="city">${city.toUpperCase()}</div>
+          <div class="slider"><div class="thumb" style="top:${thumbTop}%"></div></div>
+          <div class="side ${t.side === 'NO' ? 'no' : ''}">${t.side}</div>
+          <div class="bracket">${t.bracket_label}</div>
+          <div class="outcome ${statusClass}">${statusTxt}</div>`;
+      }
+      grid.appendChild(col);
+    }
+  }
+
+  function renderPlaylist(trades) {
+    const tb = $('trade-rows');
+    if (!trades.length) {
+      tb.innerHTML = '<tr><td colspan="7" class="loading">NO TRADES YET</td></tr>';
+      return;
+    }
+    tb.innerHTML = '';
+    trades.forEach((t, i) => {
+      const tr = document.createElement('tr');
+      const pnl = t.pnl_usd;
+      let statusCell;
+      if (t.status === 'won') {
+        statusCell = `<span class="pos">✓ WON ${pnl != null ? '+'+fmt(pnl) : ''}</span>`;
+      } else if (t.status === 'lost') {
+        statusCell = `<span class="neg">✗ LOST ${pnl != null ? fmt(pnl) : ''}</span>`;
+      } else if (t.status === 'cancelled') {
+        statusCell = `<span style="color:#666">CXL</span>`;
+      } else {
+        statusCell = `<span style="color:#ffcc00">OPEN</span>`;
+      }
+      tr.innerHTML = `
+        <td>${String(i+1).padStart(2,'0')}.</td>
+        <td>${t.city}</td>
+        <td><span class="${t.side === 'NO' ? 'no' : 'yes'}">${t.side}</span> ${t.bracket_label}</td>
+        <td class="num">${t.contracts ?? '-'}</td>
+        <td class="num">$${fmt(t.cost_usd)}</td>
+        <td class="num">$${fmt(t.best_case_payout_usd, 0)}</td>
+        <td class="num">${statusCell}</td>`;
+      tb.appendChild(tr);
+    });
+  }
+
+  loadData();
+  setInterval(loadData, 60_000); // refresh every minute
+</script>
+
+</body>
+</html>
