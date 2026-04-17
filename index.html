@@ -263,6 +263,68 @@
     width: 44px; height: 44px;
     image-rendering: pixelated;
     filter: drop-shadow(0 0 4px rgba(255,204,0,0.3));
+    animation: mascot-bob 3s ease-in-out infinite;
+  }
+  @keyframes mascot-bob {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-2px); }
+  }
+  /* Sunny: rotating sun rays */
+  .mascot .sun-rays {
+    transform-origin: 16px 16px;
+    animation: sun-spin 12s linear infinite;
+  }
+  @keyframes sun-spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+  /* Sunny: pulsing glow */
+  body[data-mood="sunny"] .mascot {
+    animation: mascot-bob 3s ease-in-out infinite, sun-glow 2.5s ease-in-out infinite;
+  }
+  @keyframes sun-glow {
+    0%, 100% { filter: drop-shadow(0 0 3px rgba(255,204,0,0.45)); }
+    50%      { filter: drop-shadow(0 0 9px rgba(255,204,0,0.9)); }
+  }
+  /* Cloudy: gentle sway */
+  body[data-mood="cloudy"] .mascot {
+    animation: mascot-sway 4s ease-in-out infinite;
+  }
+  @keyframes mascot-sway {
+    0%, 100% { transform: translateX(0); }
+    50%      { transform: translateX(2px); }
+  }
+  /* Rainy: falling raindrops */
+  .mascot .rain-d {
+    animation: drop-fall 1.2s linear infinite;
+  }
+  .mascot .rain-d:nth-child(2n) { animation-delay: 0.3s; }
+  .mascot .rain-d:nth-child(3n) { animation-delay: 0.6s; }
+  .mascot .rain-d:nth-child(4n) { animation-delay: 0.9s; }
+  @keyframes drop-fall {
+    0%   { transform: translateY(-4px); opacity: 0; }
+    20%  { opacity: 1; }
+    100% { transform: translateY(6px); opacity: 0; }
+  }
+  /* Stormy: lightning flash */
+  .mascot .lightning {
+    animation: lightning-flash 2.5s ease-out infinite;
+    transform-origin: center;
+  }
+  .mascot .lightning rect {
+    animation: lightning-color 2.5s ease-out infinite;
+  }
+  @keyframes lightning-flash {
+    0%, 40%, 100% { opacity: 1; }
+    10%, 20%      { opacity: 0.3; }
+    45%           { opacity: 1; }
+    50%           { opacity: 0.8; }
+  }
+  @keyframes lightning-color {
+    0%, 40%, 100% { fill: #ffee00; }
+    10%, 20%      { fill: #665500; }
+    45%           { fill: #ffffff; }
+    50%           { fill: #ffee00; }
   }
   .hero-center {
     text-align: left;
@@ -821,15 +883,17 @@
   // Each returns inner SVG markup for a 32x32 pixel sprite
   const MASCOTS = {
     sunny: `
-      <!-- rays -->
-      <rect x="15" y="1" width="2" height="4" fill="#ffdd44"/>
-      <rect x="15" y="27" width="2" height="4" fill="#ffdd44"/>
-      <rect x="1" y="15" width="4" height="2" fill="#ffdd44"/>
-      <rect x="27" y="15" width="4" height="2" fill="#ffdd44"/>
-      <rect x="5" y="5" width="2" height="2" fill="#ffdd44"/>
-      <rect x="25" y="5" width="2" height="2" fill="#ffdd44"/>
-      <rect x="5" y="25" width="2" height="2" fill="#ffdd44"/>
-      <rect x="25" y="25" width="2" height="2" fill="#ffdd44"/>
+      <!-- rotating rays -->
+      <g class="sun-rays">
+        <rect x="15" y="1" width="2" height="4" fill="#ffdd44"/>
+        <rect x="15" y="27" width="2" height="4" fill="#ffdd44"/>
+        <rect x="1" y="15" width="4" height="2" fill="#ffdd44"/>
+        <rect x="27" y="15" width="4" height="2" fill="#ffdd44"/>
+        <rect x="5" y="5" width="2" height="2" fill="#ffdd44"/>
+        <rect x="25" y="5" width="2" height="2" fill="#ffdd44"/>
+        <rect x="5" y="25" width="2" height="2" fill="#ffdd44"/>
+        <rect x="25" y="25" width="2" height="2" fill="#ffdd44"/>
+      </g>
       <!-- sun body -->
       <rect x="10" y="10" width="12" height="12" fill="#ffa500"/>
       <rect x="12" y="8" width="8" height="2" fill="#ffa500"/>
@@ -864,14 +928,14 @@
       <rect x="8" y="6" width="6" height="2" fill="#99aabb"/>
       <rect x="14" y="4" width="8" height="4" fill="#99aabb"/>
       <!-- raindrops -->
-      <rect x="8"  y="18" width="2" height="3" fill="#44aaff"/>
-      <rect x="12" y="20" width="2" height="3" fill="#44aaff"/>
-      <rect x="16" y="18" width="2" height="3" fill="#44aaff"/>
-      <rect x="20" y="20" width="2" height="3" fill="#44aaff"/>
-      <rect x="10" y="24" width="2" height="3" fill="#44aaff"/>
-      <rect x="14" y="26" width="2" height="3" fill="#44aaff"/>
-      <rect x="18" y="24" width="2" height="3" fill="#44aaff"/>
-      <rect x="22" y="26" width="2" height="3" fill="#44aaff"/>
+      <rect class="rain-d" x="8"  y="18" width="2" height="3" fill="#44aaff"/>
+      <rect class="rain-d" x="12" y="20" width="2" height="3" fill="#44aaff"/>
+      <rect class="rain-d" x="16" y="18" width="2" height="3" fill="#44aaff"/>
+      <rect class="rain-d" x="20" y="20" width="2" height="3" fill="#44aaff"/>
+      <rect class="rain-d" x="10" y="24" width="2" height="3" fill="#44aaff"/>
+      <rect class="rain-d" x="14" y="26" width="2" height="3" fill="#44aaff"/>
+      <rect class="rain-d" x="18" y="24" width="2" height="3" fill="#44aaff"/>
+      <rect class="rain-d" x="22" y="26" width="2" height="3" fill="#44aaff"/>
     `,
     stormy: `
       <!-- dark cloud -->
@@ -880,12 +944,14 @@
       <rect x="8" y="4" width="6" height="2" fill="#665577"/>
       <rect x="14" y="2" width="8" height="4" fill="#665577"/>
       <!-- lightning bolt -->
-      <rect x="15" y="14" width="4" height="2" fill="#ffee00"/>
-      <rect x="13" y="16" width="4" height="2" fill="#ffee00"/>
-      <rect x="11" y="18" width="6" height="2" fill="#ffee00"/>
-      <rect x="13" y="20" width="4" height="2" fill="#ffee00"/>
-      <rect x="11" y="22" width="4" height="2" fill="#ffee00"/>
-      <rect x="13" y="24" width="2" height="4" fill="#ffee00"/>
+      <g class="lightning">
+        <rect x="15" y="14" width="4" height="2" fill="#ffee00"/>
+        <rect x="13" y="16" width="4" height="2" fill="#ffee00"/>
+        <rect x="11" y="18" width="6" height="2" fill="#ffee00"/>
+        <rect x="13" y="20" width="4" height="2" fill="#ffee00"/>
+        <rect x="11" y="22" width="4" height="2" fill="#ffee00"/>
+        <rect x="13" y="24" width="2" height="4" fill="#ffee00"/>
+      </g>
       <!-- rain on sides -->
       <rect x="4"  y="18" width="1" height="3" fill="#4477aa"/>
       <rect x="7"  y="22" width="1" height="3" fill="#4477aa"/>
