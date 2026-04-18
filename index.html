@@ -413,10 +413,13 @@
   }
   .stat-lbl {
     font-family: 'Press Start 2P', monospace;
-    font-size: 7px;
+    font-size: 6px;
     color: #7a9aff;
     letter-spacing: 0;
     text-shadow: 0 0 3px #7a9affaa;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: clip;
   }
   .stat-val {
     font-size: 20px;
@@ -792,7 +795,7 @@
           <div class="stat-val on" id="cash">$--.--</div>
         </div>
         <div class="stat-box">
-          <div class="stat-lbl">POS</div>
+          <div class="stat-lbl">POSITIONS</div>
           <div class="stat-val warn" id="positions">$--.--</div>
         </div>
         <div class="stat-box">
