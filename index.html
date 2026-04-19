@@ -501,102 +501,156 @@
     to   { filter: brightness(1.2); }
   }
 
-  /* ====== Weather Stations (Equalizer) ====== */
+  /* ====== Weather Stations (Compact 8-city grid) ====== */
   .winamp.eq .titlebar {
     background: linear-gradient(180deg, #1a5a5a 0%, #0a2a2a 100%);
   }
-  .eq-body { padding: 10px 12px; }
+  .eq-body { padding: 8px 10px 10px; }
   .eq-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 6px;
+    gap: 4px;
   }
   .eq-col {
-    display: flex; flex-direction: column; align-items: center;
-    padding: 6px 4px;
+    display: grid;
+    grid-template-rows: auto 14px 8px auto;
+    row-gap: 3px;
+    padding: 5px 6px 5px;
     background: linear-gradient(180deg, #1c1c1c 0%, #080808 100%);
     border: 1px solid #000;
     box-shadow: inset 1px 1px 0 #333, inset -1px -1px 0 #000;
-    transition: background 0.8s, box-shadow 0.5s;
+    transition: background 0.6s, box-shadow 0.5s, opacity 0.5s;
     position: relative;
+    min-height: 70px;
+  }
+  /* Status-driven styles */
+  .eq-col.idle {
+    opacity: 0.45;
+    background: linear-gradient(180deg, #141414 0%, #060606 100%);
+  }
+  .eq-col.open-neutral {
+    background: linear-gradient(180deg, #2a2a14 0%, #14140a 100%);
+    box-shadow: inset 1px 1px 0 #5a5a2a, inset -1px -1px 0 #000, 0 0 6px rgba(255,200,0,0.18);
   }
   .eq-col.winning {
-    background: linear-gradient(180deg, #103a1a 0%, #041a08 100%);
-    box-shadow: inset 1px 1px 0 #2a5a3a, inset -1px -1px 0 #000, 0 0 10px rgba(0,255,120,0.25);
+    background: linear-gradient(180deg, #0f3a1c 0%, #041a08 100%);
+    box-shadow: inset 1px 1px 0 #2a5a3a, inset -1px -1px 0 #000, 0 0 9px rgba(0,255,120,0.28);
   }
   .eq-col.losing {
-    background: linear-gradient(180deg, #3a1020 0%, #1a0510 100%);
-    box-shadow: inset 1px 1px 0 #5a2a3a, inset -1px -1px 0 #000, 0 0 10px rgba(255,60,90,0.25);
+    background: linear-gradient(180deg, #3a0f20 0%, #1a0510 100%);
+    box-shadow: inset 1px 1px 0 #5a2a3a, inset -1px -1px 0 #000, 0 0 9px rgba(255,60,90,0.25);
   }
-  .eq-col.neutral {
-    background: linear-gradient(180deg, #2a2a1a 0%, #14140a 100%);
-    box-shadow: inset 1px 1px 0 #5a5a2a, inset -1px -1px 0 #000, 0 0 8px rgba(255,200,0,0.2);
+  .eq-col.won {
+    background: linear-gradient(180deg, #003a14 0%, #001a08 100%);
+    box-shadow: inset 1px 1px 0 #2a8a3a, inset -1px -1px 0 #000, 0 0 12px rgba(0,255,0,0.35);
+  }
+  .eq-col.lost {
+    background: linear-gradient(180deg, #2a0818 0%, #14040c 100%);
+    box-shadow: inset 1px 1px 0 #6a1a3a, inset -1px -1px 0 #000, 0 0 8px rgba(255,0,60,0.25);
+  }
+
+  /* Head row: city + status dot */
+  .eq-col .head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 4px;
+    line-height: 1;
   }
   .eq-col .city {
-    font-size: 11px;
+    font-size: 9px;
     font-family: 'Press Start 2P', monospace;
     color: #ffcc00;
-    text-shadow: 0 0 4px #ffcc00aa;
-    margin-bottom: 4px;
+    text-shadow: 0 0 3px #ffcc00aa;
     letter-spacing: 0;
   }
-  .eq-col.winning .city { color: #00ff88; text-shadow: 0 0 4px #00ff88aa; }
-  .eq-col.losing  .city { color: #ff6688; text-shadow: 0 0 4px #ff6688aa; }
+  .eq-col.idle     .city { color: #555; text-shadow: none; }
+  .eq-col.winning  .city { color: #00ff88; text-shadow: 0 0 3px #00ff88aa; }
+  .eq-col.losing   .city { color: #ff6688; text-shadow: 0 0 3px #ff6688aa; }
+  .eq-col.won      .city { color: #00ff00; text-shadow: 0 0 4px #00ff00aa; }
+  .eq-col.lost     .city { color: #ff3355; text-shadow: 0 0 3px #ff3355aa; }
+  .eq-col .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #333;
+    box-shadow: 0 0 0 rgba(0,0,0,0);
+  }
+  .eq-col.open-neutral .dot { background: #ffcc00; box-shadow: 0 0 4px #ffcc00; animation: dot-pulse 1.4s ease-in-out infinite; }
+  .eq-col.winning      .dot { background: #00ff66; box-shadow: 0 0 5px #00ff66; animation: dot-pulse 1.2s ease-in-out infinite; }
+  .eq-col.losing       .dot { background: #ff3355; box-shadow: 0 0 5px #ff3355; animation: dot-pulse 1.8s ease-in-out infinite; }
+  .eq-col.won          .dot { background: #00ff00; box-shadow: 0 0 6px #00ff00; }
+  .eq-col.lost         .dot { background: #ff0033; box-shadow: 0 0 4px #ff0033; }
+  @keyframes dot-pulse {
+    0%, 100% { transform: scale(1); opacity: 0.85; }
+    50%      { transform: scale(1.35); opacity: 1; }
+  }
 
-  .slider {
-    width: 14px; height: 72px;
-    background:
-      linear-gradient(180deg, rgba(255,255,255,0.05) 0 1px, transparent 1px) 0 0/ 100% 8px,
-      #050505;
-    position: relative;
+  /* Bracket line */
+  .eq-col .bracket {
+    font-size: 12px;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+  }
+  .eq-col .bracket .side { font-weight: bold; margin-right: 3px; }
+  .eq-col .bracket .side.yes { color: #00ff66; text-shadow: 0 0 3px #00ff66aa; }
+  .eq-col .bracket .side.no  { color: #ff5577; text-shadow: 0 0 3px #ff5577aa; }
+  .eq-col .bracket.empty { color: #333; }
+  .eq-col.idle .bracket { color: #333; }
+
+  /* Edge / odds meter (horizontal) */
+  .eq-col .meter {
+    height: 5px;
+    background: #050505;
     border: 1px solid #000;
     box-shadow: inset 1px 1px 0 #111;
-    margin-bottom: 4px;
+    position: relative;
+    overflow: hidden;
   }
-  .slider .thumb {
-    position: absolute;
-    left: -3px; right: -3px;
-    height: 8px;
-    background: linear-gradient(180deg, #ccc 0%, #888 50%, #444 100%);
-    border: 1px solid #000;
-    box-shadow: 0 0 6px rgba(255,255,0,0.4);
+  .eq-col .meter .fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #cc9900, #ffcc00);
+    box-shadow: 0 0 4px rgba(255,204,0,0.55);
+    transition: width 0.6s ease;
   }
-  .eq-col.winning .slider .thumb { box-shadow: 0 0 8px rgba(0,255,100,0.8); }
-  .eq-col.losing  .slider .thumb { box-shadow: 0 0 8px rgba(255,60,90,0.8); }
+  .eq-col.winning .meter .fill { background: linear-gradient(90deg, #008833, #00ff88); box-shadow: 0 0 5px rgba(0,255,120,0.6); }
+  .eq-col.losing  .meter .fill { background: linear-gradient(90deg, #882233, #ff5577); box-shadow: 0 0 4px rgba(255,60,90,0.5); }
+  .eq-col.won     .meter .fill { background: linear-gradient(90deg, #00aa00, #00ff00); width: 100% !important; }
+  .eq-col.lost    .meter .fill { background: linear-gradient(90deg, #660011, #ff0033); width: 100% !important; opacity: 0.4; }
+  .eq-col.idle    .meter { visibility: hidden; }
 
-  .eq-col .side {
-    font-size: 13px;
-    color: #00ff66;
-    text-shadow: 0 0 4px #00ff66aa;
-  }
-  .eq-col .side.no { color: #ff5577; text-shadow: 0 0 4px #ff5577aa; }
-  .eq-col .bracket { font-size: 14px; color: #fff; }
-  .eq-col .current-temp {
-    font-size: 12px;
-    color: #88ccff;
-    text-shadow: 0 0 4px #88ccffaa;
-    margin-top: 3px;
+  /* Foot row: current temp + odds% OR outcome + pnl */
+  .eq-col .foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 4px;
     font-variant-numeric: tabular-nums;
+    line-height: 1;
+    margin-top: 2px;
   }
-  .eq-col.winning .current-temp { color: #88ff88; text-shadow: 0 0 4px #88ff88aa; }
-  .eq-col.losing  .current-temp { color: #ff9999; text-shadow: 0 0 4px #ff9999aa; }
-  .eq-col .odds {
+  .eq-col .temp {
     font-size: 11px;
-    color: #aaccff;
-    margin-top: 1px;
+    color: #88ccff;
+    text-shadow: 0 0 3px #88ccffaa;
+  }
+  .eq-col.idle .temp { color: #556; text-shadow: none; font-size: 10px; }
+  .eq-col .meta {
+    font-size: 10px;
+    font-family: 'Press Start 2P', monospace;
+    color: #ffcc00;
+    text-shadow: 0 0 3px #ffcc00aa;
     letter-spacing: 0;
   }
-  .eq-col.winning .odds { color: #ccffcc; }
-  .eq-col.losing  .odds { color: #ffcccc; }
-  .eq-col .outcome {
-    margin-top: 4px;
-    font-family: 'Press Start 2P', monospace;
-    font-size: 8px;
-    padding: 3px 4px;
-  }
-  .outcome.open { color: #7a9aff; }
-  .outcome.won  { color: #00ff00; background: #001a00; }
-  .outcome.lost { color: #ff3355; background: #1a0000; }
+  .eq-col.winning .meta { color: #00ff88; text-shadow: 0 0 3px #00ff88aa; }
+  .eq-col.losing  .meta { color: #ff6688; text-shadow: 0 0 3px #ff6688aa; }
+  .eq-col.won     .meta { color: #00ff00; text-shadow: 0 0 4px #00ff00aa; }
+  .eq-col.lost    .meta { color: #ff3355; text-shadow: 0 0 3px #ff3355aa; }
+  .eq-col.idle    .meta { display: none; }
 
   /* ====== Playlist (Trades) ====== */
   .winamp.pl .titlebar {
@@ -697,13 +751,16 @@
     .mascot { width: 40px; height: 40px; }
     .stat-val { font-size: 17px; }
     .countdown-val { font-size: 20px; }
-    .eq-col .city { font-size: 9px; }
-    .eq-col .current-temp { font-size: 11px; }
-    .eq-col .odds { font-size: 10px; }
+    /* 8 stations → 2×4 grid on mobile */
+    .eq-grid { grid-template-columns: repeat(2, 1fr); gap: 4px; }
+    .eq-col { min-height: 64px; padding: 5px 6px; }
+    .eq-col .city { font-size: 8px; }
+    .eq-col .bracket { font-size: 11px; }
+    .eq-col .temp { font-size: 10px; }
+    .eq-col .meta { font-size: 9px; }
     .pl-table { font-size: 13px; }
     .pl-table thead td { font-size: 10px; }
     .pl-table td { padding: 3px 4px; }
-    .slider { height: 56px; }
   }
   @media (max-width: 380px) {
     .hero-val { font-size: 28px; }
@@ -880,13 +937,23 @@
   const SUPABASE_URL = 'https://ywqhpxheoutoufhfizzt.supabase.co';
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl3cWhweGhlb3V0b3VmaGZpenp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3NDc0MDEsImV4cCI6MjA5MDMyMzQwMX0.kdEpa-3DU_jDQS8hNpXkKh9BgNazE_Oy_EORRnDBG6A';
 
-  // City coordinates for Open-Meteo live weather lookups
-  const CITY_COORDS = {
-    Denver:  { lat: 39.74,  lon: -104.99 },
-    Chicago: { lat: 41.88,  lon:  -87.63 },
-    Miami:   { lat: 25.76,  lon:  -80.19 },
-    LA:      { lat: 34.05,  lon: -118.24 },
-  };
+  // Stations the bot scans — 8 cities, 2×4 grid.
+  // `aliases` covers every way the trade record might spell the city.
+  const STATIONS = [
+    { key: 'NY',           label: 'NYC', aliases: ['NY','NYC','New York','New York City'],      lat: 40.71,  lon:  -74.01 },
+    { key: 'Chicago',      label: 'CHI', aliases: ['Chicago','CHI'],                            lat: 41.88,  lon:  -87.63 },
+    { key: 'Denver',       label: 'DEN', aliases: ['Denver','DEN'],                             lat: 39.74,  lon: -104.99 },
+    { key: 'LA',           label: 'LAX', aliases: ['LA','LAX','Los Angeles','Los Angeles CA'],  lat: 34.05,  lon: -118.24 },
+    { key: 'Philadelphia', label: 'PHI', aliases: ['Philadelphia','PHI','Philly'],              lat: 39.95,  lon:  -75.17 },
+    { key: 'Miami',        label: 'MIA', aliases: ['Miami','MIA'],                              lat: 25.76,  lon:  -80.19 },
+    { key: 'Austin',       label: 'AUS', aliases: ['Austin','AUS'],                             lat: 30.27,  lon:  -97.74 },
+    { key: 'Houston',      label: 'HOU', aliases: ['Houston','HOU'],                            lat: 29.76,  lon:  -95.37 },
+  ];
+  const STATION_BY_ALIAS = (() => {
+    const m = new Map();
+    for (const s of STATIONS) for (const a of s.aliases) m.set(a.toLowerCase(), s);
+    return m;
+  })();
 
   // ================== UI HELPERS ==================
   function $(id) { return document.getElementById(id); }
@@ -1155,24 +1222,22 @@
   }
 
   // Current temp from Open-Meteo (no API key required)
-  const tempCache = new Map(); // city → {temp, ts}
-  async function getCurrentTemp(city) {
-    const cached = tempCache.get(city);
+  const tempCache = new Map(); // station.key → {temp, ts}
+  async function getCurrentTemp(station) {
+    const cached = tempCache.get(station.key);
     if (cached && (Date.now() - cached.ts) < 10 * 60_000) return cached.temp;
-    const c = CITY_COORDS[city];
-    if (!c) return null;
     try {
-      const url = `https://api.open-meteo.com/v1/forecast?latitude=${c.lat}&longitude=${c.lon}&current=temperature_2m&temperature_unit=fahrenheit`;
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${station.lat}&longitude=${station.lon}&current=temperature_2m&temperature_unit=fahrenheit`;
       const r = await fetch(url);
       if (!r.ok) throw new Error('wx ' + r.status);
       const j = await r.json();
       const t = Math.round(j?.current?.temperature_2m);
       if (Number.isFinite(t)) {
-        tempCache.set(city, { temp: t, ts: Date.now() });
+        tempCache.set(station.key, { temp: t, ts: Date.now() });
         return t;
       }
     } catch (e) {
-      console.warn('temp fetch failed for', city, e);
+      console.warn('temp fetch failed for', station.key, e);
     }
     return null;
   }
@@ -1263,75 +1328,99 @@
     return t.side === 'YES' ? price : (100 - price);
   }
 
+  // Shorten bracket labels for tight tiles: "76° or above" → "≥76°", "69° to 70°" → "69-70°"
+  function shortBracket(label) {
+    if (!label) return '';
+    let s = label.replace(/\s+/g, ' ').trim();
+    s = s.replace(/(\d+)°?\s*or\s+above/i, '≥$1°');
+    s = s.replace(/(\d+)°?\s*or\s+below/i, '≤$1°');
+    s = s.replace(/(\d+)°?\s*to\s+(\d+)°/i, '$1-$2°');
+    // Collapse leading "Will the (min|max|low|high) temperature be <X° on ..." → "<X°"
+    s = s.replace(/.*\b(?:be|reach|hit)\s+(?:below\s+)?(?:<|less than )?\s*(\d+)°.*/i, '<$1°');
+    if (s.length > 14) s = s.slice(0, 13) + '…';
+    return s;
+  }
+
   async function renderStations(trades) {
     const grid = $('eq-grid');
-    const cities = ['Denver','Chicago','Miami','LA'];
-    if (!trades.length) {
-      grid.innerHTML = '<div class="loading" style="grid-column:1/-1;">NO STATIONS ACTIVE</div>';
-      return;
-    }
-    const open = trades.filter(t => t.status === 'open');
-    const recent = open.length ? open : trades;
-    const byCity = {};
-    for (const t of recent) {
-      if (!byCity[t.city]) byCity[t.city] = t;
+
+    // Pick best trade per station: prefer open, then most-recent resolved.
+    const pick = new Map();
+    const push = (station, t, pref) => {
+      const cur = pick.get(station.key);
+      if (!cur || pref > cur.pref) pick.set(station.key, { trade: t, pref });
+    };
+    for (const t of trades || []) {
+      const st = STATION_BY_ALIAS.get(String(t.city || '').toLowerCase());
+      if (!st) continue;
+      const pref =
+        t.status === 'open' ? 3 :
+        t.status === 'won'  ? 2 :
+        t.status === 'lost' ? 2 : 1;
+      push(st, t, pref);
     }
 
     // Kick off temp fetches in parallel (cached)
-    const tempPromises = cities.map(c => getCurrentTemp(c));
+    const tempPromises = STATIONS.map(s => getCurrentTemp(s));
 
     grid.innerHTML = '';
     const cols = [];
-    for (const city of cities) {
-      const t = byCity[city];
+    for (const station of STATIONS) {
+      const entry = pick.get(station.key);
+      const t = entry?.trade;
       const col = document.createElement('div');
       col.className = 'eq-col';
+
+      let meterPct = 0;
+      let metaText = '';
+      let bracketHtml = '<span class="empty">—</span>';
+
       if (!t) {
-        col.innerHTML = `
-          <div class="city">${city.toUpperCase()}</div>
-          <div class="slider"><div class="thumb" style="top:45%"></div></div>
-          <div class="side">—</div>
-          <div class="bracket">—</div>
-          <div class="current-temp">— °F</div>
-          <div class="odds">— %</div>
-          <div class="outcome open">IDLE</div>`;
-      } else {
-        const thumbTop = Math.max(0, Math.min(95, 95 - (t.price_cents || 50)));
-        const statusClass = t.status === 'won' ? 'won' :
-                            t.status === 'lost' ? 'lost' : 'open';
-        const statusTxt = (t.status || 'open').toUpperCase();
+        col.classList.add('idle');
+        metaText = '';
+      } else if (t.status === 'open') {
         const winP = winLikelihood(t);
-        // Color state: winning / losing / neutral
-        if (t.status === 'open') {
-          if (winP >= 60) col.classList.add('winning');
-          else if (winP <= 40) col.classList.add('losing');
-          else col.classList.add('neutral');
-        } else if (t.status === 'won') {
-          col.classList.add('winning');
-        } else if (t.status === 'lost') {
-          col.classList.add('losing');
-        }
-        col.innerHTML = `
-          <div class="city">${city.toUpperCase()}</div>
-          <div class="slider"><div class="thumb" style="top:${thumbTop}%"></div></div>
-          <div class="side ${t.side === 'NO' ? 'no' : ''}">${t.side}</div>
-          <div class="bracket">${t.bracket_label}</div>
-          <div class="current-temp" data-city="${city}">— °F</div>
-          <div class="odds">${Math.round(winP)}% WIN</div>
-          <div class="outcome ${statusClass}">${statusTxt}</div>`;
+        meterPct = Math.max(4, Math.min(100, winP));
+        if (winP >= 60)      col.classList.add('winning');
+        else if (winP <= 40) col.classList.add('losing');
+        else                 col.classList.add('open-neutral');
+        metaText = Math.round(winP) + '%';
+        bracketHtml = `<span class="side ${t.side === 'NO' ? 'no' : 'yes'}">${t.side}</span>${shortBracket(t.bracket_label)}`;
+      } else if (t.status === 'won') {
+        col.classList.add('won');
+        const pnl = Number(t.pnl_usd || 0);
+        metaText = '✓ +$' + fmt(Math.abs(pnl));
+        bracketHtml = `<span class="side ${t.side === 'NO' ? 'no' : 'yes'}">${t.side}</span>${shortBracket(t.bracket_label)}`;
+      } else if (t.status === 'lost') {
+        col.classList.add('lost');
+        const pnl = Number(t.pnl_usd || 0);
+        metaText = '✗ −$' + fmt(Math.abs(pnl));
+        bracketHtml = `<span class="side ${t.side === 'NO' ? 'no' : 'yes'}">${t.side}</span>${shortBracket(t.bracket_label)}`;
+      } else {
+        col.classList.add('idle');
       }
-      cols.push({ city, col, trade: t });
+
+      col.innerHTML = `
+        <div class="head">
+          <span class="city">${station.label}</span>
+          <span class="dot"></span>
+        </div>
+        <div class="bracket">${bracketHtml}</div>
+        <div class="meter"><div class="fill" style="width:${meterPct}%"></div></div>
+        <div class="foot">
+          <span class="temp" data-station="${station.key}">—°</span>
+          <span class="meta">${metaText}</span>
+        </div>`;
+      cols.push({ station, col });
       grid.appendChild(col);
     }
 
     // Apply resolved temperatures
     const temps = await Promise.all(tempPromises);
-    cities.forEach((city, i) => {
+    STATIONS.forEach((st, i) => {
       const temp = temps[i];
-      const cell = cols[i].col.querySelector('.current-temp');
-      if (cell && Number.isFinite(temp)) {
-        cell.textContent = temp + '°F NOW';
-      }
+      const cell = cols[i].col.querySelector('.temp');
+      if (cell && Number.isFinite(temp)) cell.textContent = temp + '°F';
     });
   }
 
