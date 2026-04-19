@@ -1272,21 +1272,27 @@
 
   function renderHeader(snap, run, trades) {
     if (!snap) return;
-    // The snapshot is only written ~5×/day by the bot — values can be stale right after
-    // the bot places new trades. We recompute live stats from the trades table so the UI
-    // stays in sync with what Kalshi actually shows. Cash is the only field we can't
-    // derive, so we fall back to the snapshot for it.
+    // The bot writes a live snapshot from Kalshi's /portfolio/positions on every run
+    // (after FIX 8e, 2026-04-19). Trust snap.cash_usd + snap.positions_value_usd —
+    // those are Kalshi's ground truth (mark-to-market, includes fees). Only fall
+    // back to a cost-basis recompute from trades if the snapshot is missing data
+    // (first run, RPC dropped, etc.), which is why the || guards exist.
     const cash = Number(snap.cash_usd ?? 0);
     const openTrades = trades.filter(t => t.status === 'open');
     const resolvedTrades = trades.filter(t => t.status === 'won' || t.status === 'lost');
-    const positionsCost = openTrades.reduce((s, t) => s + Number(t.cost_usd || 0), 0);
+    const positionsCostFallback = openTrades.reduce((s, t) => s + Number(t.cost_usd || 0), 0);
+    const positionsValue = Number(snap.positions_value_usd ?? 0) || positionsCostFallback;
     const pnl = resolvedTrades.reduce((s, t) => s + Number(t.pnl_usd || 0), 0);
-    const portfolio = cash + positionsCost;
+    const portfolio = Number(snap.portfolio_total_usd ?? 0) || (cash + positionsValue);
+    const openCount = Number(snap.open_positions_count ?? NaN);
+    const openCountDisplay = Number.isFinite(openCount) && openCount > 0
+      ? openCount
+      : openTrades.length;
 
     $('portfolio').textContent = usd(portfolio);
     $('cash').textContent = usd(cash);
-    $('positions').textContent = usd(positionsCost);
-    $('open-count').textContent = openTrades.length;
+    $('positions').textContent = usd(positionsValue);
+    $('open-count').textContent = openCountDisplay;
 
     const pnlEl = $('pnl');
     pnlEl.textContent = (pnl >= 0 ? '+$' : '-$') + fmt(Math.abs(pnl));
