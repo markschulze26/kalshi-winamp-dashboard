@@ -1335,7 +1335,10 @@
     const resolved = wins + losses;
     const winPct = resolved > 0 ? Math.round((wins / resolved) * 100) : null;
 
-    const dailyPnl = Number(scan.daily_pnl_usd ?? 0);
+    // Daily P&L: prefer live sum from crypto_trades (authoritative after bot restarts
+    // reset the in-memory RiskState). Fall back to scan's daily_pnl_usd if no exits yet.
+    const realizedToday = exitsToday.reduce((s, t) => s + Number(t.realized_pnl_usd || 0), 0);
+    const dailyPnl = exitsToday.length > 0 ? realizedToday : Number(scan.daily_pnl_usd ?? 0);
     const balance = cash + positionsCost;
 
     $('balance').textContent = usd(balance);
