@@ -280,47 +280,47 @@
   .mascot {
     width: 44px; height: 44px;
     image-rendering: pixelated;
-    filter: drop-shadow(0 0 4px rgba(0,255,120,0.3));
+    filter: drop-shadow(0 0 4px rgba(255,204,0,0.35));  /* gold default (Zeus) */
     animation: mascot-bob 3s ease-in-out infinite;
   }
   @keyframes mascot-bob {
     0%, 100% { transform: translateY(0); }
     50%      { transform: translateY(-2px); }
   }
-  /* BULL: pumping glow */
+  /* BULL: triumphant gold pulse (Zeus casting thunderbolts) */
   body[data-mood="bull"] .mascot {
     animation: mascot-bob 2s ease-in-out infinite, bull-glow 1.5s ease-in-out infinite;
   }
   @keyframes bull-glow {
-    0%, 100% { filter: drop-shadow(0 0 3px rgba(0,255,120,0.5)); }
-    50%      { filter: drop-shadow(0 0 10px rgba(0,255,120,1)); }
+    0%, 100% { filter: drop-shadow(0 0 4px rgba(255,204,0,0.65)); }
+    50%      { filter: drop-shadow(0 0 12px rgba(255,221,68,1)) drop-shadow(0 0 6px rgba(0,255,102,0.4)); }
   }
-  /* FLAT: gentle sway */
+  /* FLAT: calm olympian sway */
   body[data-mood="flat"] .mascot {
     animation: mascot-sway 5s ease-in-out infinite;
-    filter: drop-shadow(0 0 3px rgba(150,170,200,0.35));
+    filter: drop-shadow(0 0 3px rgba(180,160,100,0.40));
   }
   @keyframes mascot-sway {
     0%, 100% { transform: translateX(0); }
     50%      { transform: translateX(2px); }
   }
-  /* BEAR: heavy descent */
+  /* BEAR: weary descent with faded blue hint */
   body[data-mood="bear"] .mascot {
     animation: mascot-fall 3s ease-in-out infinite;
-    filter: drop-shadow(0 0 3px rgba(255,70,100,0.5));
+    filter: drop-shadow(0 0 3px rgba(80,110,170,0.55));
   }
   @keyframes mascot-fall {
     0%, 100% { transform: translateY(0); }
     50%      { transform: translateY(3px); }
   }
-  /* CRASH: chaotic flicker */
+  /* CRASH: angry red thunder flicker */
   body[data-mood="crash"] .mascot {
     animation: mascot-panic 0.6s steps(3) infinite;
   }
   @keyframes mascot-panic {
-    0%, 100% { transform: translateX(0); filter: drop-shadow(0 0 3px rgba(255,80,200,0.7)); }
-    33%      { transform: translateX(-1px); filter: drop-shadow(0 0 7px rgba(255,80,200,1)); }
-    66%      { transform: translateX(1px); filter: drop-shadow(0 0 4px rgba(255,80,200,0.8)); }
+    0%, 100% { transform: translateX(0);  filter: drop-shadow(0 0 4px rgba(255,50,80,0.75)); }
+    33%      { transform: translateX(-1px); filter: drop-shadow(0 0 9px rgba(255,80,100,1)); }
+    66%      { transform: translateX(1px);  filter: drop-shadow(0 0 5px rgba(200,30,60,0.85)); }
   }
 
   .hero-center {
@@ -1012,74 +1012,192 @@
     return '$' + n.toFixed(6);
   }
 
-  // ================== PIXEL MASCOTS (regime-swapped) ==================
+  // ================== PIXEL MASCOTS — CRYPTO ZEUS (regime-swapped) ==================
+  // All 4 variants share the same Zeus silhouette (gold laurel + white hair + beard + bolt).
+  // What changes per regime: bolt colour, face expression (eyes + mouth), and aura.
+  // 32×32 sprite, rendered at 40×40 via CSS. Chunky pixel-art, no antialiasing.
   const MASCOTS = {
-    // BULL — green pumping candle with up-arrow
+    // BULL — happy Zeus, glowing gold bolt, golden halo
     bull: `
-      <!-- body (green candle) -->
-      <rect x="11" y="8"  width="10" height="18" fill="#00aa44"/>
-      <rect x="12" y="7"  width="8"  height="20" fill="#00cc55"/>
-      <rect x="13" y="6"  width="6"  height="22" fill="#00ff66"/>
-      <!-- wicks -->
-      <rect x="15" y="2"  width="2"  height="4"  fill="#00ff66"/>
-      <rect x="15" y="28" width="2"  height="3"  fill="#00aa44"/>
-      <!-- highlight -->
-      <rect x="13" y="7" width="2" height="8" fill="#44ff88"/>
-      <!-- up arrow overlay -->
-      <rect x="14" y="11" width="4" height="2" fill="#ffffff"/>
-      <rect x="13" y="12" width="2" height="2" fill="#ffffff"/>
-      <rect x="17" y="12" width="2" height="2" fill="#ffffff"/>
-      <rect x="12" y="13" width="2" height="2" fill="#ffffff"/>
-      <rect x="18" y="13" width="2" height="2" fill="#ffffff"/>
+      <!-- golden halo (bull = on fire) -->
+      <rect x="5"  y="5"  width="22" height="16" fill="#ffcc00" opacity="0.20"/>
+      <rect x="3"  y="7"  width="2"  height="2"  fill="#ffdd44" opacity="0.6"/>
+      <rect x="27" y="7"  width="2"  height="2"  fill="#ffdd44" opacity="0.6"/>
+      <rect x="3"  y="15" width="2"  height="2"  fill="#ffdd44" opacity="0.5"/>
+      <!-- laurel wreath (gold leaves) -->
+      <rect x="10" y="4"  width="12" height="2"  fill="#ffcc00"/>
+      <rect x="8"  y="5"  width="2"  height="2"  fill="#ccaa00"/>
+      <rect x="13" y="3"  width="2"  height="2"  fill="#ffdd44"/>
+      <rect x="17" y="3"  width="2"  height="2"  fill="#ffdd44"/>
+      <rect x="22" y="5"  width="2"  height="2"  fill="#ccaa00"/>
+      <!-- white hair top -->
+      <rect x="9"  y="6"  width="14" height="3"  fill="#f8f8f8"/>
+      <!-- hair side strands -->
+      <rect x="7"  y="8"  width="3"  height="6"  fill="#ffffff"/>
+      <rect x="22" y="8"  width="3"  height="6"  fill="#ffffff"/>
+      <!-- face (skin) -->
+      <rect x="10" y="9"  width="12" height="5"  fill="#f4c499"/>
+      <!-- happy upturned eyes (^_^) -->
+      <rect x="12" y="11" width="2"  height="1"  fill="#000000"/>
+      <rect x="18" y="11" width="2"  height="1"  fill="#000000"/>
+      <rect x="13" y="10" width="1"  height="1"  fill="#000000"/>
+      <rect x="19" y="10" width="1"  height="1"  fill="#000000"/>
+      <!-- smile -->
+      <rect x="14" y="13" width="4"  height="1"  fill="#6a3000"/>
+      <rect x="13" y="12" width="1"  height="1"  fill="#6a3000"/>
+      <rect x="18" y="12" width="1"  height="1"  fill="#6a3000"/>
+      <!-- white beard cascade -->
+      <rect x="9"  y="14" width="14" height="3"  fill="#f8f8f8"/>
+      <rect x="8"  y="16" width="16" height="3"  fill="#ffffff"/>
+      <rect x="9"  y="18" width="14" height="3"  fill="#f4f4f4"/>
+      <rect x="11" y="20" width="10" height="2"  fill="#eeeeee"/>
+      <rect x="13" y="22" width="6"  height="1"  fill="#cccccc"/>
+      <!-- toga (white with gold belt) -->
+      <rect x="10" y="23" width="12" height="5"  fill="#dddddd"/>
+      <rect x="9"  y="25" width="14" height="3"  fill="#cccccc"/>
+      <rect x="14" y="25" width="4"  height="2"  fill="#ffcc00"/>
+      <rect x="14" y="25" width="1"  height="1"  fill="#ffffff"/>
+      <!-- BRIGHT GOLD lightning bolt (right hand, raised) -->
+      <rect x="25" y="7"  width="4"  height="2"  fill="#ffee00"/>
+      <rect x="23" y="9"  width="4"  height="2"  fill="#ffee00"/>
+      <rect x="24" y="11" width="4"  height="2"  fill="#ffee00"/>
+      <rect x="22" y="13" width="5"  height="2"  fill="#ffee00"/>
+      <rect x="23" y="15" width="3"  height="4"  fill="#ffee00"/>
+      <!-- bolt flash highlights -->
+      <rect x="26" y="8"  width="1"  height="1"  fill="#ffffff"/>
+      <rect x="24" y="12" width="1"  height="1"  fill="#ffffff"/>
     `,
-    // FLAT — grey doji candle with equal bars
+    // FLAT — calm Zeus, steady yellow bolt, neutral face
     flat: `
-      <rect x="12" y="12" width="8" height="8" fill="#6a7a8a"/>
-      <rect x="13" y="11" width="6" height="10" fill="#8a9aaa"/>
-      <rect x="14" y="10" width="4" height="12" fill="#aabbcc"/>
-      <!-- wicks -->
-      <rect x="15" y="4"  width="2" height="6" fill="#6a7a8a"/>
-      <rect x="15" y="22" width="2" height="6" fill="#6a7a8a"/>
-      <!-- equal sign -->
-      <rect x="11" y="14" width="10" height="1" fill="#ccddee"/>
-      <rect x="11" y="17" width="10" height="1" fill="#ccddee"/>
+      <!-- laurel wreath -->
+      <rect x="10" y="4"  width="12" height="2"  fill="#ccaa00"/>
+      <rect x="8"  y="5"  width="2"  height="2"  fill="#aa8800"/>
+      <rect x="13" y="3"  width="2"  height="2"  fill="#ccaa00"/>
+      <rect x="17" y="3"  width="2"  height="2"  fill="#ccaa00"/>
+      <rect x="22" y="5"  width="2"  height="2"  fill="#aa8800"/>
+      <!-- white hair top -->
+      <rect x="9"  y="6"  width="14" height="3"  fill="#e8e8e8"/>
+      <!-- hair side strands -->
+      <rect x="7"  y="8"  width="3"  height="6"  fill="#dddddd"/>
+      <rect x="22" y="8"  width="3"  height="6"  fill="#dddddd"/>
+      <!-- face -->
+      <rect x="10" y="9"  width="12" height="5"  fill="#e8b080"/>
+      <!-- neutral eyes (•_•) -->
+      <rect x="13" y="11" width="1"  height="2"  fill="#000000"/>
+      <rect x="18" y="11" width="1"  height="2"  fill="#000000"/>
+      <!-- flat mouth -->
+      <rect x="14" y="13" width="4"  height="1"  fill="#663300"/>
+      <!-- white beard -->
+      <rect x="9"  y="14" width="14" height="3"  fill="#e8e8e8"/>
+      <rect x="8"  y="16" width="16" height="3"  fill="#dddddd"/>
+      <rect x="9"  y="18" width="14" height="3"  fill="#d0d0d0"/>
+      <rect x="11" y="20" width="10" height="2"  fill="#c8c8c8"/>
+      <rect x="13" y="22" width="6"  height="1"  fill="#bbbbbb"/>
+      <!-- toga -->
+      <rect x="10" y="23" width="12" height="5"  fill="#bbbbbb"/>
+      <rect x="9"  y="25" width="14" height="3"  fill="#aaaaaa"/>
+      <rect x="14" y="25" width="4"  height="2"  fill="#aa8800"/>
+      <!-- Yellow bolt (muted) -->
+      <rect x="25" y="8"  width="3"  height="2"  fill="#ddbb00"/>
+      <rect x="23" y="10" width="4"  height="2"  fill="#ddbb00"/>
+      <rect x="24" y="12" width="3"  height="2"  fill="#ddbb00"/>
+      <rect x="23" y="14" width="3"  height="2"  fill="#ddbb00"/>
+      <rect x="24" y="16" width="2"  height="3"  fill="#ddbb00"/>
     `,
-    // BEAR — red dumping candle with down-arrow
+    // BEAR — worried Zeus, dim bolt, tiny raincloud above
     bear: `
-      <!-- body (red candle) -->
-      <rect x="11" y="6"  width="10" height="18" fill="#aa2244"/>
-      <rect x="12" y="5"  width="8"  height="20" fill="#cc3355"/>
-      <rect x="13" y="4"  width="6"  height="22" fill="#ff4466"/>
-      <!-- wicks -->
-      <rect x="15" y="1"  width="2"  height="3"  fill="#aa2244"/>
-      <rect x="15" y="26" width="2"  height="4"  fill="#ff4466"/>
-      <!-- shadow -->
-      <rect x="17" y="5" width="2" height="8" fill="#aa1133"/>
-      <!-- down arrow overlay -->
-      <rect x="14" y="19" width="4" height="2" fill="#ffffff"/>
-      <rect x="13" y="18" width="2" height="2" fill="#ffffff"/>
-      <rect x="17" y="18" width="2" height="2" fill="#ffffff"/>
-      <rect x="12" y="17" width="2" height="2" fill="#ffffff"/>
-      <rect x="18" y="17" width="2" height="2" fill="#ffffff"/>
+      <!-- small raincloud overhead (the bear setup) -->
+      <rect x="6"  y="1"  width="6"  height="2"  fill="#556677"/>
+      <rect x="5"  y="2"  width="8"  height="2"  fill="#445566"/>
+      <rect x="7"  y="3"  width="1"  height="2"  fill="#3366aa"/>
+      <rect x="10" y="3"  width="1"  height="2"  fill="#3366aa"/>
+      <!-- laurel wreath (dulled) -->
+      <rect x="10" y="4"  width="12" height="2"  fill="#997700"/>
+      <rect x="8"  y="5"  width="2"  height="2"  fill="#775500"/>
+      <rect x="22" y="5"  width="2"  height="2"  fill="#775500"/>
+      <rect x="13" y="3"  width="2"  height="2"  fill="#aa8800"/>
+      <rect x="17" y="3"  width="2"  height="2"  fill="#aa8800"/>
+      <!-- white hair -->
+      <rect x="9"  y="6"  width="14" height="3"  fill="#d0d0d0"/>
+      <rect x="7"  y="8"  width="3"  height="6"  fill="#c0c0c0"/>
+      <rect x="22" y="8"  width="3"  height="6"  fill="#c0c0c0"/>
+      <!-- face (slightly paler) -->
+      <rect x="10" y="9"  width="12" height="5"  fill="#d8a070"/>
+      <!-- worried eyes (droopy) -->
+      <rect x="13" y="11" width="1"  height="2"  fill="#000000"/>
+      <rect x="18" y="11" width="1"  height="2"  fill="#000000"/>
+      <!-- eyebrow slant (worried) -->
+      <rect x="12" y="10" width="2"  height="1"  fill="#663300"/>
+      <rect x="18" y="10" width="2"  height="1"  fill="#663300"/>
+      <!-- frown -->
+      <rect x="14" y="13" width="4"  height="1"  fill="#3a1100"/>
+      <rect x="13" y="14" width="1"  height="1"  fill="#3a1100"/>
+      <rect x="18" y="14" width="1"  height="1"  fill="#3a1100"/>
+      <!-- beard -->
+      <rect x="9"  y="14" width="14" height="3"  fill="#d0d0d0"/>
+      <rect x="8"  y="16" width="16" height="3"  fill="#c4c4c4"/>
+      <rect x="9"  y="18" width="14" height="3"  fill="#b8b8b8"/>
+      <rect x="11" y="20" width="10" height="2"  fill="#aaaaaa"/>
+      <rect x="13" y="22" width="6"  height="1"  fill="#999999"/>
+      <!-- toga -->
+      <rect x="10" y="23" width="12" height="5"  fill="#9a9a9a"/>
+      <rect x="9"  y="25" width="14" height="3"  fill="#888888"/>
+      <rect x="14" y="25" width="4"  height="2"  fill="#775500"/>
+      <!-- Dim blue bolt (drained) -->
+      <rect x="25" y="9"  width="3"  height="2"  fill="#4466aa"/>
+      <rect x="23" y="11" width="4"  height="2"  fill="#4466aa"/>
+      <rect x="24" y="13" width="3"  height="2"  fill="#4466aa"/>
+      <rect x="23" y="15" width="3"  height="2"  fill="#4466aa"/>
+      <rect x="24" y="17" width="2"  height="2"  fill="#4466aa"/>
     `,
-    // CRASH — dark candle with lightning bolt
+    // CRASH — panicked Zeus, red broken bolt, dark red aura
     crash: `
-      <!-- broken candle -->
-      <rect x="11" y="14" width="10" height="12" fill="#441133"/>
-      <rect x="10" y="16" width="12" height="10" fill="#551144"/>
-      <!-- cracks -->
-      <rect x="13" y="18" width="2" height="4" fill="#220011"/>
-      <rect x="17" y="20" width="2" height="4" fill="#220011"/>
-      <!-- lightning bolt -->
-      <rect x="15" y="2"  width="4" height="2" fill="#ff44aa"/>
-      <rect x="13" y="4"  width="4" height="2" fill="#ff44aa"/>
-      <rect x="11" y="6"  width="6" height="2" fill="#ff44aa"/>
-      <rect x="13" y="8"  width="4" height="2" fill="#ff44aa"/>
-      <rect x="11" y="10" width="4" height="2" fill="#ff44aa"/>
-      <rect x="13" y="12" width="2" height="4" fill="#ff44aa"/>
-      <!-- flash highlights -->
-      <rect x="14" y="3"  width="1" height="1" fill="#ffffff"/>
-      <rect x="12" y="7"  width="1" height="1" fill="#ffffff"/>
+      <!-- dark red aura (angry / crash flash) -->
+      <rect x="4"  y="4"  width="24" height="20" fill="#aa0022" opacity="0.22"/>
+      <rect x="2"  y="14" width="2"  height="2"  fill="#ff3355" opacity="0.7"/>
+      <rect x="28" y="14" width="2"  height="2"  fill="#ff3355" opacity="0.7"/>
+      <!-- laurel wreath (broken, red-tinted) -->
+      <rect x="10" y="4"  width="12" height="2"  fill="#cc6644"/>
+      <rect x="8"  y="5"  width="2"  height="2"  fill="#993322"/>
+      <rect x="22" y="5"  width="2"  height="2"  fill="#993322"/>
+      <rect x="13" y="3"  width="2"  height="2"  fill="#ffaa66"/>
+      <rect x="17" y="3"  width="2"  height="2"  fill="#ffaa66"/>
+      <!-- white hair (a bit messy) -->
+      <rect x="9"  y="6"  width="14" height="3"  fill="#f0f0f0"/>
+      <rect x="6"  y="7"  width="2"  height="1"  fill="#f0f0f0"/>
+      <rect x="24" y="7"  width="2"  height="1"  fill="#f0f0f0"/>
+      <rect x="7"  y="8"  width="3"  height="6"  fill="#e4e4e4"/>
+      <rect x="22" y="8"  width="3"  height="6"  fill="#e4e4e4"/>
+      <!-- face (pale, panicked) -->
+      <rect x="10" y="9"  width="12" height="5"  fill="#ecb090"/>
+      <!-- shocked wide eyes (O_O) -->
+      <rect x="12" y="10" width="3"  height="3"  fill="#ffffff"/>
+      <rect x="17" y="10" width="3"  height="3"  fill="#ffffff"/>
+      <rect x="13" y="11" width="1"  height="1"  fill="#000000"/>
+      <rect x="18" y="11" width="1"  height="1"  fill="#000000"/>
+      <!-- surprised open mouth -->
+      <rect x="14" y="13" width="4"  height="2"  fill="#220000"/>
+      <rect x="15" y="14" width="2"  height="1"  fill="#440000"/>
+      <!-- beard (still there, slightly tousled) -->
+      <rect x="9"  y="15" width="14" height="3"  fill="#e8e8e8"/>
+      <rect x="8"  y="17" width="16" height="3"  fill="#dddddd"/>
+      <rect x="9"  y="19" width="14" height="2"  fill="#cccccc"/>
+      <rect x="11" y="21" width="10" height="1"  fill="#bbbbbb"/>
+      <rect x="13" y="22" width="6"  height="1"  fill="#aaaaaa"/>
+      <!-- toga -->
+      <rect x="10" y="23" width="12" height="5"  fill="#b0b0b0"/>
+      <rect x="9"  y="25" width="14" height="3"  fill="#a0a0a0"/>
+      <rect x="14" y="25" width="4"  height="2"  fill="#993322"/>
+      <!-- BROKEN red bolt (crashing) -->
+      <rect x="25" y="8"  width="4"  height="2"  fill="#ff2244"/>
+      <rect x="24" y="10" width="3"  height="2"  fill="#cc1133"/>
+      <!-- gap in bolt (broken!) -->
+      <rect x="26" y="13" width="3"  height="2"  fill="#ff2244"/>
+      <rect x="23" y="15" width="4"  height="2"  fill="#ff2244"/>
+      <rect x="24" y="17" width="2"  height="2"  fill="#cc1133"/>
+      <!-- red flash sparks -->
+      <rect x="28" y="11" width="1"  height="1"  fill="#ffffff"/>
+      <rect x="22" y="16" width="1"  height="1"  fill="#ffffff"/>
     `,
   };
 
