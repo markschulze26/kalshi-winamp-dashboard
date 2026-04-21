@@ -774,6 +774,18 @@
     text-shadow: 0 0 3px #f66;
     animation: killpulse 1s ease-in-out infinite alternate;
   }
+  /* FIX L 2026-04-21 — cooldown state (streak-pause with auto-resume) */
+  .kill-switch.cooldown {
+    background: #420;
+    color: #fa0;
+    box-shadow: 0 0 5px #fa080;
+    text-shadow: 0 0 3px #fa0;
+    animation: cooldownpulse 2s ease-in-out infinite alternate;
+  }
+  @keyframes cooldownpulse {
+    from { filter: brightness(0.8); }
+    to   { filter: brightness(1.2); }
+  }
   @keyframes killpulse {
     from { filter: brightness(0.7); }
     to   { filter: brightness(1.3); }
@@ -1419,14 +1431,30 @@
   }
 
   function renderKillSwitch(cfg) {
+    // FIX L 2026-04-21 — 3-state widget:
+    //   bot_enabled=false                        → BOT OFF (hard-stop)
+    //   bot_enabled=true + pause_until > now     → COOLDOWN Xm (streak-pause, auto-resume)
+    //   bot_enabled=true + pause_until empty/past → BOT LIVE
     const el = $('killSwitch');
     const enabled = String(cfg.bot_enabled ?? 'true').toLowerCase() === 'true';
-    if (enabled) {
-      el.className = 'kill-switch live';
-      el.textContent = '● BOT LIVE';
-    } else {
+    const pauseUntilStr = String(cfg.pause_until ?? '').trim();
+    let pauseUntil = null;
+    if (pauseUntilStr) {
+      const d = new Date(pauseUntilStr);
+      if (!isNaN(d.getTime())) pauseUntil = d;
+    }
+    const now = new Date();
+
+    if (!enabled) {
       el.className = 'kill-switch off';
       el.textContent = '■ BOT OFF';
+    } else if (pauseUntil && pauseUntil > now) {
+      const minsLeft = Math.max(1, Math.ceil((pauseUntil - now) / 60000));
+      el.className = 'kill-switch cooldown';
+      el.textContent = '⏸ COOLDOWN ' + minsLeft + 'm';
+    } else {
+      el.className = 'kill-switch live';
+      el.textContent = '● BOT LIVE';
     }
   }
 
