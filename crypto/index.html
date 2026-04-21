@@ -58,81 +58,32 @@
       #000;
   }
 
-  /* ====== Animated Regime Background Layer ====== */
+  /* ====== Starfield Background (ruhig, blitzende Sterne) ====== */
   .regime-bg {
     position: fixed; inset: 0;
     z-index: -1;
     pointer-events: none;
     overflow: hidden;
   }
-  .regime-bg .particle {
+  .regime-bg .star {
     position: absolute;
-    will-change: transform;
+    width: 2px; height: 2px;
+    background: rgba(255, 255, 255, 0.85);
+    border-radius: 50%;
+    box-shadow: 0 0 2px rgba(255, 255, 255, 0.6);
+    animation: twinkle linear infinite;
+    will-change: opacity;
   }
-  /* BULL — green up-arrows pumping */
-  .regime-bg .up-arrow {
-    width: 0; height: 0;
-    border-left: 3px solid transparent;
-    border-right: 3px solid transparent;
-    border-bottom: 6px solid rgba(0,255,120,0.55);
-    filter: drop-shadow(0 0 3px rgba(0,255,120,0.6));
-    animation: pump linear infinite;
+  .regime-bg .star.big {
+    width: 3px; height: 3px;
+    box-shadow: 0 0 4px rgba(255, 255, 255, 0.8);
   }
-  @keyframes pump {
-    0%   { transform: translateY(calc(100vh + 10px)); opacity: 0; }
-    10%  { opacity: 1; }
-    100% { transform: translateY(-20px); opacity: 0.3; }
-  }
-  /* BEAR — red down-arrows dumping */
-  .regime-bg .down-arrow {
-    width: 0; height: 0;
-    border-left: 3px solid transparent;
-    border-right: 3px solid transparent;
-    border-top: 6px solid rgba(255,70,100,0.6);
-    filter: drop-shadow(0 0 3px rgba(255,70,100,0.6));
-    animation: dump linear infinite;
-  }
-  @keyframes dump {
-    0%   { transform: translateY(-20px); opacity: 0; }
-    10%  { opacity: 1; }
-    100% { transform: translateY(calc(100vh + 20px)); opacity: 0.3; }
-  }
-  /* FLAT — horizontal ticker lines */
-  .regime-bg .tick-line {
-    width: 50px; height: 1px;
-    background: rgba(120,140,180,0.15);
-    filter: blur(0.5px);
-    animation: drift-h linear infinite;
-  }
-  @keyframes drift-h {
-    from { transform: translateX(-80px); }
-    to   { transform: translateX(calc(100vw + 80px)); }
-  }
-  /* CRASH — bolts flashing */
-  .regime-bg.crash::before {
-    content: "";
-    position: absolute; inset: 0;
-    background: rgba(255,80,200,0.18);
-    animation: flash 5s steps(1) infinite;
-    opacity: 0;
-  }
-  @keyframes flash {
-    0%, 96%, 100% { opacity: 0; }
-    96.4%         { opacity: 0.9; }
-    96.8%         { opacity: 0; }
-    97.2%         { opacity: 0.7; }
-    97.6%         { opacity: 0; }
-  }
-  .regime-bg .bolt {
-    width: 2px; height: 14px;
-    background: linear-gradient(180deg, rgba(255,80,200,0.8), rgba(120,0,80,0));
-    filter: drop-shadow(0 0 4px #ff44aa);
-    animation: zap 0.6s ease-in infinite;
-  }
-  @keyframes zap {
-    0%, 100% { opacity: 0; transform: translateY(0) scale(0.4); }
-    20%      { opacity: 1; transform: translateY(10px) scale(1); }
-    100%     { opacity: 0; transform: translateY(30px) scale(0.7); }
+  .regime-bg .star.tint-bull   { background: rgba(120, 255, 160, 0.85); box-shadow: 0 0 3px rgba(120, 255, 160, 0.7); }
+  .regime-bg .star.tint-bear   { background: rgba(255, 120, 140, 0.85); box-shadow: 0 0 3px rgba(255, 120, 140, 0.7); }
+  .regime-bg .star.tint-crash  { background: rgba(255, 100, 200, 0.85); box-shadow: 0 0 3px rgba(255, 100, 200, 0.7); }
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.15; }
+    50%      { opacity: 1;    }
   }
 
   /* ====== Winamp Window Frame ====== */
@@ -571,6 +522,10 @@
     box-shadow: 0 0 5px #ff4466;
   }
   .eq-col.offline .dot { background: #2a2a2a; }
+  /* Asset 24h-PnL status dot — green = net winner, red = net loser, gray = no trades */
+  .eq-col.pnl-pos .dot { background: #00ff66; box-shadow: 0 0 4px #00ff66aa; }
+  .eq-col.pnl-neg .dot { background: #ff4466; box-shadow: 0 0 4px #ff4466aa; }
+  .eq-col.pnl-flat .dot { background: #6a6a6a; box-shadow: 0 0 2px #6a6a6a; }
   @keyframes dot-pulse {
     0%, 100% { transform: scale(1); opacity: 0.85; }
     50%      { transform: scale(1.35); opacity: 1; }
@@ -1024,198 +979,65 @@
     return '$' + n.toFixed(6);
   }
 
-  // ================== PIXEL MASCOTS — CRYPTO ZEUS (regime-swapped) ==================
-  // Minimalist head-only Zeus: flowing hair/beard silhouette + closed eyes + two
-  // lightning bolts flanking the skull. Think "neon god icon" at 32×32 Winamp-pixel
-  // scale. All four moods share the exact silhouette — only eye shape, bolt colour,
-  // and skin tint change. No body / toga / laurel / extra furniture.
+  // ================== PIXEL MASCOT — CRYPTO COIN ₿ (regime-tinted) ==================
+  // Minimalist pixel-coin: outer ring, inner face, ₿ symbol in rects.
+  // All 4 moods share silhouette; only ring & symbol color change.
+  function coinSVG(ringColor, faceColor, symbolColor, glowColor) {
+    return `
+      <!-- outer ring (8px radius ring via concentric rects approximation) -->
+      <rect x="10" y="3"  width="12" height="2" fill="${ringColor}"/>
+      <rect x="6"  y="5"  width="4"  height="2" fill="${ringColor}"/>
+      <rect x="22" y="5"  width="4"  height="2" fill="${ringColor}"/>
+      <rect x="4"  y="7"  width="2"  height="2" fill="${ringColor}"/>
+      <rect x="26" y="7"  width="2"  height="2" fill="${ringColor}"/>
+      <rect x="3"  y="9"  width="2"  height="4" fill="${ringColor}"/>
+      <rect x="27" y="9"  width="2"  height="4" fill="${ringColor}"/>
+      <rect x="2"  y="13" width="2"  height="6" fill="${ringColor}"/>
+      <rect x="28" y="13" width="2"  height="6" fill="${ringColor}"/>
+      <rect x="3"  y="19" width="2"  height="4" fill="${ringColor}"/>
+      <rect x="27" y="19" width="2"  height="4" fill="${ringColor}"/>
+      <rect x="4"  y="23" width="2"  height="2" fill="${ringColor}"/>
+      <rect x="26" y="23" width="2"  height="2" fill="${ringColor}"/>
+      <rect x="6"  y="25" width="4"  height="2" fill="${ringColor}"/>
+      <rect x="22" y="25" width="4"  height="2" fill="${ringColor}"/>
+      <rect x="10" y="27" width="12" height="2" fill="${ringColor}"/>
+      <!-- coin face (inner fill) -->
+      <rect x="10" y="5"  width="12" height="22" fill="${faceColor}"/>
+      <rect x="6"  y="7"  width="4"  height="18" fill="${faceColor}"/>
+      <rect x="22" y="7"  width="4"  height="18" fill="${faceColor}"/>
+      <rect x="5"  y="9"  width="1"  height="14" fill="${faceColor}"/>
+      <rect x="26" y="9"  width="1"  height="14" fill="${faceColor}"/>
+      <rect x="4"  y="13" width="1"  height="6"  fill="${faceColor}"/>
+      <rect x="27" y="13" width="1"  height="6"  fill="${faceColor}"/>
+      <!-- glow outline (subtle, drawn on the ring) -->
+      <rect x="11" y="2"  width="10" height="1" fill="${glowColor}" opacity="0.6"/>
+      <rect x="11" y="29" width="10" height="1" fill="${glowColor}" opacity="0.6"/>
+      <!-- ₿ symbol: vertical strokes + two P-bumps (8x14 interior) -->
+      <!-- vertical stems (B has two uprights for the serifs) -->
+      <rect x="12" y="7"  width="2" height="2"  fill="${symbolColor}"/>
+      <rect x="12" y="23" width="2" height="2"  fill="${symbolColor}"/>
+      <!-- main body (trunk) -->
+      <rect x="14" y="9"  width="2" height="14" fill="${symbolColor}"/>
+      <!-- upper bump of B -->
+      <rect x="16" y="9"  width="3" height="2"  fill="${symbolColor}"/>
+      <rect x="19" y="11" width="1" height="3"  fill="${symbolColor}"/>
+      <rect x="16" y="14" width="3" height="2"  fill="${symbolColor}"/>
+      <!-- lower bump of B -->
+      <rect x="16" y="16" width="4" height="2"  fill="${symbolColor}"/>
+      <rect x="20" y="18" width="1" height="3"  fill="${symbolColor}"/>
+      <rect x="16" y="21" width="4" height="2"  fill="${symbolColor}"/>
+    `;
+  }
+
   const MASCOTS = {
-    // ---- BULL — gold bolts, serene closed eyes, small glow outline ----
-    bull: `
-      <!-- LEFT lightning bolt (bright gold) -->
-      <rect x="2"  y="6"  width="3" height="2" fill="#ffdd44"/>
-      <rect x="3"  y="8"  width="3" height="2" fill="#ffee00"/>
-      <rect x="2"  y="10" width="3" height="2" fill="#ffdd44"/>
-      <rect x="4"  y="11" width="1" height="1" fill="#ffffff"/>
-      <!-- RIGHT lightning bolt (bright gold) -->
-      <rect x="27" y="6"  width="3" height="2" fill="#ffdd44"/>
-      <rect x="26" y="8"  width="3" height="2" fill="#ffee00"/>
-      <rect x="27" y="10" width="3" height="2" fill="#ffdd44"/>
-      <rect x="27" y="11" width="1" height="1" fill="#ffffff"/>
-
-      <!-- Flowing hair: top curls -->
-      <rect x="11" y="2"  width="2" height="2" fill="#ffffff"/>
-      <rect x="14" y="2"  width="4" height="2" fill="#ffffff"/>
-      <rect x="19" y="2"  width="2" height="2" fill="#ffffff"/>
-      <rect x="10" y="4"  width="12" height="2" fill="#ffffff"/>
-      <rect x="8"  y="5"  width="16" height="3" fill="#ffffff"/>
-      <!-- Side hair falling past face -->
-      <rect x="7"  y="7"  width="3"  height="7" fill="#ffffff"/>
-      <rect x="22" y="7"  width="3"  height="7" fill="#ffffff"/>
-      <rect x="6"  y="9"  width="2"  height="4" fill="#eeeeee"/>
-      <rect x="24" y="9"  width="2"  height="4" fill="#eeeeee"/>
-
-      <!-- Face (skin) -->
-      <rect x="10" y="7"  width="12" height="6" fill="#f4c499"/>
-      <!-- Closed eyes with upward curve (happy) -->
-      <rect x="12" y="10" width="1" height="1" fill="#000000"/>
-      <rect x="13" y="9"  width="2" height="1" fill="#000000"/>
-      <rect x="17" y="9"  width="2" height="1" fill="#000000"/>
-      <rect x="19" y="10" width="1" height="1" fill="#000000"/>
-      <!-- Subtle smile hint -->
-      <rect x="14" y="12" width="4" height="1" fill="#c08060"/>
-
-      <!-- Flowing long beard -->
-      <rect x="10" y="13" width="12" height="2" fill="#ffffff"/>
-      <rect x="8"  y="14" width="16" height="3" fill="#ffffff"/>
-      <rect x="9"  y="17" width="14" height="3" fill="#f6f6f6"/>
-      <rect x="10" y="20" width="12" height="2" fill="#eeeeee"/>
-      <rect x="11" y="22" width="10" height="2" fill="#e0e0e0"/>
-      <!-- Split beard strands (the signature wave) -->
-      <rect x="10" y="24" width="4"  height="3" fill="#d8d8d8"/>
-      <rect x="18" y="24" width="4"  height="3" fill="#d8d8d8"/>
-      <rect x="15" y="24" width="2"  height="2" fill="#d8d8d8"/>
-      <rect x="11" y="27" width="2"  height="3" fill="#cccccc"/>
-      <rect x="19" y="27" width="2"  height="3" fill="#cccccc"/>
-      <rect x="15" y="26" width="2"  height="2" fill="#cccccc"/>
-    `,
-
-    // ---- FLAT — muted gold bolts, calm serene closed eyes ----
-    flat: `
-      <!-- Bolts (muted gold) -->
-      <rect x="2"  y="6"  width="3" height="2" fill="#b39700"/>
-      <rect x="3"  y="8"  width="3" height="2" fill="#ccaa00"/>
-      <rect x="2"  y="10" width="3" height="2" fill="#b39700"/>
-      <rect x="27" y="6"  width="3" height="2" fill="#b39700"/>
-      <rect x="26" y="8"  width="3" height="2" fill="#ccaa00"/>
-      <rect x="27" y="10" width="3" height="2" fill="#b39700"/>
-
-      <!-- Hair top -->
-      <rect x="11" y="2"  width="2"  height="2" fill="#eeeeee"/>
-      <rect x="14" y="2"  width="4"  height="2" fill="#eeeeee"/>
-      <rect x="19" y="2"  width="2"  height="2" fill="#eeeeee"/>
-      <rect x="10" y="4"  width="12" height="2" fill="#eeeeee"/>
-      <rect x="8"  y="5"  width="16" height="3" fill="#eeeeee"/>
-      <!-- Side hair -->
-      <rect x="7"  y="7"  width="3"  height="7" fill="#e4e4e4"/>
-      <rect x="22" y="7"  width="3"  height="7" fill="#e4e4e4"/>
-      <rect x="6"  y="9"  width="2"  height="4" fill="#d4d4d4"/>
-      <rect x="24" y="9"  width="2"  height="4" fill="#d4d4d4"/>
-
-      <!-- Face -->
-      <rect x="10" y="7"  width="12" height="6" fill="#e8b080"/>
-      <!-- Closed eyes (simple horizontal lines — at peace) -->
-      <rect x="12" y="10" width="3"  height="1" fill="#000000"/>
-      <rect x="17" y="10" width="3"  height="1" fill="#000000"/>
-      <!-- Neutral mouth -->
-      <rect x="14" y="12" width="4"  height="1" fill="#8a5a3a"/>
-
-      <!-- Flowing beard -->
-      <rect x="10" y="13" width="12" height="2" fill="#eeeeee"/>
-      <rect x="8"  y="14" width="16" height="3" fill="#e4e4e4"/>
-      <rect x="9"  y="17" width="14" height="3" fill="#d8d8d8"/>
-      <rect x="10" y="20" width="12" height="2" fill="#cccccc"/>
-      <rect x="11" y="22" width="10" height="2" fill="#c0c0c0"/>
-      <rect x="10" y="24" width="4"  height="3" fill="#b8b8b8"/>
-      <rect x="18" y="24" width="4"  height="3" fill="#b8b8b8"/>
-      <rect x="15" y="24" width="2"  height="2" fill="#b8b8b8"/>
-      <rect x="11" y="27" width="2"  height="3" fill="#aaaaaa"/>
-      <rect x="19" y="27" width="2"  height="3" fill="#aaaaaa"/>
-      <rect x="15" y="26" width="2"  height="2" fill="#aaaaaa"/>
-    `,
-
-    // ---- BEAR — dim blue bolts, drooping eyelids ----
-    bear: `
-      <!-- Bolts (dim blue — drained) -->
-      <rect x="2"  y="6"  width="3" height="2" fill="#335588"/>
-      <rect x="3"  y="8"  width="3" height="2" fill="#4466aa"/>
-      <rect x="2"  y="10" width="3" height="2" fill="#335588"/>
-      <rect x="27" y="6"  width="3" height="2" fill="#335588"/>
-      <rect x="26" y="8"  width="3" height="2" fill="#4466aa"/>
-      <rect x="27" y="10" width="3" height="2" fill="#335588"/>
-
-      <!-- Hair (slightly dim) -->
-      <rect x="11" y="2"  width="2"  height="2" fill="#d4d4d4"/>
-      <rect x="14" y="2"  width="4"  height="2" fill="#d4d4d4"/>
-      <rect x="19" y="2"  width="2"  height="2" fill="#d4d4d4"/>
-      <rect x="10" y="4"  width="12" height="2" fill="#d4d4d4"/>
-      <rect x="8"  y="5"  width="16" height="3" fill="#d4d4d4"/>
-      <rect x="7"  y="7"  width="3"  height="7" fill="#c8c8c8"/>
-      <rect x="22" y="7"  width="3"  height="7" fill="#c8c8c8"/>
-      <rect x="6"  y="9"  width="2"  height="4" fill="#b8b8b8"/>
-      <rect x="24" y="9"  width="2"  height="4" fill="#b8b8b8"/>
-
-      <!-- Face (paler, worn) -->
-      <rect x="10" y="7"  width="12" height="6" fill="#d8a070"/>
-      <!-- Drooping closed eyes (downward curve) -->
-      <rect x="12" y="9"  width="1" height="1" fill="#000000"/>
-      <rect x="13" y="10" width="2" height="1" fill="#000000"/>
-      <rect x="17" y="10" width="2" height="1" fill="#000000"/>
-      <rect x="19" y="9"  width="1" height="1" fill="#000000"/>
-      <!-- Frown -->
-      <rect x="14" y="13" width="4" height="1" fill="#3a1100"/>
-      <rect x="13" y="12" width="1" height="1" fill="#3a1100"/>
-      <rect x="18" y="12" width="1" height="1" fill="#3a1100"/>
-
-      <!-- Beard (duller) -->
-      <rect x="10" y="13" width="12" height="2" fill="#c8c8c8"/>
-      <rect x="8"  y="14" width="16" height="3" fill="#bcbcbc"/>
-      <rect x="9"  y="17" width="14" height="3" fill="#b0b0b0"/>
-      <rect x="10" y="20" width="12" height="2" fill="#a4a4a4"/>
-      <rect x="11" y="22" width="10" height="2" fill="#999999"/>
-      <rect x="10" y="24" width="4"  height="3" fill="#8a8a8a"/>
-      <rect x="18" y="24" width="4"  height="3" fill="#8a8a8a"/>
-      <rect x="15" y="24" width="2"  height="2" fill="#8a8a8a"/>
-      <rect x="11" y="27" width="2"  height="3" fill="#777777"/>
-      <rect x="19" y="27" width="2"  height="3" fill="#777777"/>
-      <rect x="15" y="26" width="2"  height="2" fill="#777777"/>
-    `,
-
-    // ---- CRASH — red bolts, eyes snap open (shocked) ----
-    crash: `
-      <!-- Bolts (angry red, jagged) -->
-      <rect x="2"  y="6"  width="3" height="2" fill="#cc1133"/>
-      <rect x="3"  y="8"  width="3" height="2" fill="#ff2244"/>
-      <rect x="2"  y="10" width="3" height="2" fill="#cc1133"/>
-      <rect x="4"  y="11" width="1" height="1" fill="#ffffff"/>
-      <rect x="27" y="6"  width="3" height="2" fill="#cc1133"/>
-      <rect x="26" y="8"  width="3" height="2" fill="#ff2244"/>
-      <rect x="27" y="10" width="3" height="2" fill="#cc1133"/>
-      <rect x="27" y="11" width="1" height="1" fill="#ffffff"/>
-
-      <!-- Hair (slightly tousled) -->
-      <rect x="11" y="2"  width="2"  height="2" fill="#f0f0f0"/>
-      <rect x="14" y="2"  width="4"  height="2" fill="#f0f0f0"/>
-      <rect x="19" y="2"  width="2"  height="2" fill="#f0f0f0"/>
-      <rect x="10" y="4"  width="12" height="2" fill="#f0f0f0"/>
-      <rect x="8"  y="5"  width="16" height="3" fill="#f0f0f0"/>
-      <rect x="7"  y="7"  width="3"  height="7" fill="#e4e4e4"/>
-      <rect x="22" y="7"  width="3"  height="7" fill="#e4e4e4"/>
-      <rect x="6"  y="9"  width="2"  height="4" fill="#d4d4d4"/>
-      <rect x="24" y="9"  width="2"  height="4" fill="#d4d4d4"/>
-
-      <!-- Face (flushed pale) -->
-      <rect x="10" y="7"  width="12" height="6" fill="#eca890"/>
-      <!-- SNAPPED-OPEN eyes (shock) — whites + pupils -->
-      <rect x="12" y="9"  width="3"  height="3" fill="#ffffff"/>
-      <rect x="17" y="9"  width="3"  height="3" fill="#ffffff"/>
-      <rect x="13" y="10" width="1"  height="1" fill="#000000"/>
-      <rect x="18" y="10" width="1"  height="1" fill="#000000"/>
-      <!-- Open mouth (gasp) -->
-      <rect x="14" y="13" width="4"  height="2" fill="#220000"/>
-
-      <!-- Beard -->
-      <rect x="10" y="15" width="12" height="2" fill="#e8e8e8"/>
-      <rect x="8"  y="16" width="16" height="3" fill="#dcdcdc"/>
-      <rect x="9"  y="19" width="14" height="3" fill="#cccccc"/>
-      <rect x="10" y="22" width="12" height="2" fill="#bbbbbb"/>
-      <rect x="11" y="24" width="10" height="2" fill="#aaaaaa"/>
-      <rect x="10" y="26" width="4"  height="3" fill="#999999"/>
-      <rect x="18" y="26" width="4"  height="3" fill="#999999"/>
-      <rect x="15" y="26" width="2"  height="2" fill="#999999"/>
-      <rect x="12" y="29" width="2"  height="2" fill="#888888"/>
-      <rect x="18" y="29" width="2"  height="2" fill="#888888"/>
-    `,
+    // BULL — bright gold coin, green glow
+    bull:  coinSVG('#ffcc33', '#ffd75e', '#8b5a00', '#00ff88'),
+    // FLAT — steady silver/bronze, cool tint
+    flat:  coinSVG('#c0a060', '#e8d080', '#5a3d00', '#6a8cae'),
+    // BEAR — muted copper, dim
+    bear:  coinSVG('#a06a3a', '#c48d58', '#3a2200', '#ff6a88'),
+    // CRASH — red-tinted coin, hot pink glow
+    crash: coinSVG('#d04040', '#e8a0a0', '#5a0000', '#ff66cc'),
   };
 
   function setMascot(mood) {
@@ -1235,40 +1057,43 @@
 
   function buildRegimeBg(mood) {
     const bg = $('regimeBg');
-    bg.className = 'regime-bg' + (mood === 'crash' ? ' crash' : '');
+    bg.className = 'regime-bg';
+    // Only rebuild stars once — avoid flicker between mood changes
+    if (bg.dataset.built === '1') {
+      // Re-tint existing stars based on mood
+      const tintClass = mood === 'bull' ? 'tint-bull'
+                      : mood === 'bear' ? 'tint-bear'
+                      : mood === 'crash' ? 'tint-crash'
+                      : '';
+      bg.querySelectorAll('.star').forEach(s => {
+        s.classList.remove('tint-bull', 'tint-bear', 'tint-crash');
+        // Only ~35% of stars get mood-tinted; rest stay white for calmness
+        if (tintClass && Math.random() < 0.35) s.classList.add(tintClass);
+      });
+      return;
+    }
     bg.innerHTML = '';
-    const count = {
-      bull: 45,
-      flat: 10,
-      bear: 45,
-      crash: 60,
-    }[mood] || 10;
+    const count = 60; // sparse starfield
     for (let i = 0; i < count; i++) {
-      const p = document.createElement('div');
-      p.className = 'particle';
-      if (mood === 'bull') {
-        p.classList.add('up-arrow');
-        p.style.left = Math.random() * 100 + 'vw';
-        p.style.animationDuration = (1.2 + Math.random() * 1.6) + 's';
-        p.style.animationDelay = (Math.random() * 2) + 's';
-      } else if (mood === 'bear') {
-        p.classList.add('down-arrow');
-        p.style.left = Math.random() * 100 + 'vw';
-        p.style.animationDuration = (1.2 + Math.random() * 1.6) + 's';
-        p.style.animationDelay = (Math.random() * 2) + 's';
-      } else if (mood === 'crash') {
-        p.classList.add('bolt');
-        p.style.left = Math.random() * 100 + 'vw';
-        p.style.top  = Math.random() * 100 + 'vh';
-        p.style.animationDuration = (0.4 + Math.random() * 0.5) + 's';
-        p.style.animationDelay = (Math.random() * 2) + 's';
-      } else {
-        p.classList.add('tick-line');
-        p.style.top = Math.random() * 100 + 'vh';
-        p.style.animationDuration = (18 + Math.random() * 25) + 's';
-        p.style.animationDelay = -(Math.random() * 40) + 's';
-      }
-      bg.appendChild(p);
+      const s = document.createElement('div');
+      s.className = 'star';
+      if (Math.random() < 0.2) s.classList.add('big');
+      s.style.left = Math.random() * 100 + 'vw';
+      s.style.top  = Math.random() * 100 + 'vh';
+      s.style.animationDuration = (2 + Math.random() * 4) + 's';
+      s.style.animationDelay = (-Math.random() * 4) + 's';
+      bg.appendChild(s);
+    }
+    bg.dataset.built = '1';
+    // Apply initial tint
+    const tintClass = mood === 'bull' ? 'tint-bull'
+                    : mood === 'bear' ? 'tint-bear'
+                    : mood === 'crash' ? 'tint-crash'
+                    : '';
+    if (tintClass) {
+      bg.querySelectorAll('.star').forEach(s => {
+        if (Math.random() < 0.35) s.classList.add(tintClass);
+      });
     }
   }
 
@@ -1416,9 +1241,18 @@
       const latestScan = scans[0];
       const configMap = Object.fromEntries((config || []).map(c => [c.key, c.value]));
 
+      // Build active assets list from config (e.g. HYPE cut → not in config.assets → not rendered)
+      const assetsRaw = String(configMap.assets || '').trim();
+      const activeKeys = assetsRaw
+        ? assetsRaw.split(',').map(s => s.trim().toUpperCase()).filter(Boolean)
+        : ASSETS.map(a => a.key);
+      const activeAssets = activeKeys
+        .map(k => ASSETS.find(a => a.key === k))
+        .filter(Boolean);
+
       renderKillSwitch(configMap);
       renderHeader(latestScan, trades, scans);
-      await renderAssets(trades, latestScan);
+      await renderAssets(trades, latestScan, activeAssets);
       renderPlaylist(trades);
       renderSparkline(scans);
       applyMood(deriveMood(latestScan, trades));
@@ -1501,21 +1335,114 @@
     const pnlEl = $('daily-pnl');
     pnlEl.textContent = (dailyPnl >= 0 ? '+$' : '-$') + fmt(Math.abs(dailyPnl));
 
-    // Marquee: live bot status
+    // Marquee: live bot status — smart line that explains WHY the bot is not trading
     const sCount = scans.length;
     $('scan-num').textContent = sCount;
     $('scan-edges').textContent = scan.edges_found ?? 0;
     const when = scan.scan_at ? new Date(scan.scan_at) : new Date();
-    const limits = Array.isArray(scan.limits_hit) ? scan.limits_hit.join(',') : '';
-    $('nowplaying').textContent =
-      'SCAN #' + sCount +
-      ' · MARKETS=' + (scan.markets_evaluated ?? '?') +
-      ' · EDGES=' + (scan.edges_found ?? 0) +
-      ' · ENTRIES=' + (scan.entries_placed ?? 0) +
-      ' · EXITS=' + (scan.exits_placed ?? 0) +
-      (limits ? ' · LIMITS=' + limits : '') +
-      ' · ' + when.toISOString().slice(11, 19) + ' UTC';
+    $('nowplaying').textContent = buildStatusLine(scan, trades);
   }
+
+  // Parse note like "skips={'target_too_close': 4, 'vol_cold': 1}" into { target_too_close: 4, ...}
+  function parseSkips(note) {
+    const out = {};
+    if (!note) return out;
+    const m = String(note).match(/skips=\{([^}]*)\}/);
+    if (!m || !m[1].trim()) return out;
+    m[1].split(',').forEach(pair => {
+      const mp = pair.match(/'([^']+)':\s*(\d+)/);
+      if (mp) out[mp[1]] = parseInt(mp[2], 10);
+    });
+    return out;
+  }
+
+  // Compute current consecutive loss streak (iterating exit trades newest-first).
+  function currentLossStreak(trades) {
+    let streak = 0;
+    for (const t of trades || []) {
+      if (!t.action || !t.action.startsWith('exit')) continue;
+      if (t.realized_pnl_usd === null || t.realized_pnl_usd === undefined) continue;
+      if (Number(t.realized_pnl_usd) < 0) streak++;
+      else break;
+    }
+    return streak;
+  }
+
+  // Minutes since the newest trade (any action). null if no trades.
+  function lastTradeMinAgo(trades) {
+    for (const t of trades || []) {
+      if (t.opened_at) {
+        return Math.floor((Date.now() - new Date(t.opened_at).getTime()) / 60000);
+      }
+    }
+    return null;
+  }
+
+  // Build the single-line status explaining the bot's current state in plain terms.
+  // Priority (first-match-wins): OFF > COOLDOWN > STREAK-BLOCK > IN-TRADE > EDGE-FOUND > WAITING > LIVE
+  // Wrapper: builds base status, prepends/appends conditional chips (streak / idle).
+  function buildStatusLine(scan, trades) {
+    let line = buildStatusLineBase(scan, trades);
+    const streak = currentLossStreak(trades);
+    if (streak >= 2) {
+      const icon = streak >= 3 ? '🔴' : '⚠';
+      line = icon + ' STREAK ' + streak + ' · ' + line;
+    }
+    const minAgo = lastTradeMinAgo(trades);
+    if (minAgo !== null && minAgo >= 90) {
+      const h = Math.floor(minAgo / 60);
+      const m = minAgo % 60;
+      const ago = h > 0 ? (h + 'h ' + m + 'min') : (m + 'min');
+      line += ' · ⏳ letzter Trade ' + ago;
+    }
+    return line;
+  }
+
+  function buildStatusLineBase(scan, trades) {
+    if (!scan) return 'BOOTING…';
+    const skips = parseSkips(scan.note);
+    const limits = Array.isArray(scan.limits_hit) ? scan.limits_hit : [];
+    const mkts = Number(scan.markets_evaluated ?? 0);
+    const edges = Number(scan.edges_found ?? 0);
+    const open = Number(scan.open_positions_count ?? 0);
+
+    // Bot off / cooldown via cfg (we read from DOM state-set by renderKillSwitch)
+    const ks = $('killSwitch');
+    const ksText = ks ? ks.textContent : '';
+    if (ksText.includes('OFF'))      return '■ BOT OFF · kein Trading';
+    if (ksText.includes('COOLDOWN')) return '⏸ ' + ksText.replace('⏸','').trim() + ' · auto-resume';
+
+    if (limits.some(l => l.includes('losing_streak'))) {
+      return '⚠ STREAK-BLOCK · auto-resume 60min nach Trigger';
+    }
+    if (limits.includes('max_daily_trades')) {
+      return '⚠ DAILY-CAP erreicht · UTC-Rollover räumt auf';
+    }
+    if (limits.includes('daily_loss_limit')) {
+      return '⚠ DAILY-LOSS-LIMIT · Hard-Stop bis UTC-Rollover';
+    }
+
+    if (open > 0) {
+      return '● IN TRADE · ' + open + ' offen';
+    }
+    if (edges > 0) {
+      return '● EDGE GEFUNDEN · Entry läuft';
+    }
+
+    // Waiting states — parse skips
+    const ttc = skips.target_too_close || 0;
+    const vol = skips.vol_cold || 0;
+    const totalSkipped = ttc + vol;
+    if (mkts > 0 && totalSkipped >= mkts) {
+      if (ttc > vol) return '◐ WARTEN · alle ' + mkts + ' nah am Target';
+      return '◐ WARTEN · alle ' + mkts + ' zu ruhig (σ low)';
+    }
+    if (ttc > 0) return '◐ LIVE · ' + ttc + '/' + mkts + ' nah am Target';
+    if (vol > 0) return '◐ LIVE · ' + vol + '/' + mkts + ' zu ruhig';
+
+    return '● LIVE · scanne ' + mkts + ' Märkte';
+  }
+
 
   // Shorten target label: extract number only
   function shortTarget(t) {
@@ -1524,7 +1451,7 @@
     return '—';
   }
 
-  async function renderAssets(trades, scan) {
+  async function renderAssets(trades, scan, activeAssets) {
     const grid = $('eq-grid');
     const nowMs = Date.now();
 
@@ -1547,12 +1474,15 @@
       push(a, t, pref);
     }
 
+    // Use only assets currently enabled in crypto_bot_config.assets
+    const assetsToRender = (activeAssets && activeAssets.length) ? activeAssets : ASSETS;
+
     // Kick off spot fetches in parallel (cached 30s)
-    const spotPromises = ASSETS.map(a => getLiveSpot(a));
+    const spotPromises = assetsToRender.map(a => getLiveSpot(a));
 
     grid.innerHTML = '';
     const cols = [];
-    for (const asset of ASSETS) {
+    for (const asset of assetsToRender) {
       const entry = pick.get(asset.key);
       const t = entry?.trade;
       const col = document.createElement('div');
@@ -1613,7 +1543,7 @@
         <span class="sym">STATS</span>
         <span class="dot"></span>
       </div>
-      <div class="bracket">KX·15M·7 PAIRS</div>
+      <div class="bracket">KX·15M·${assetsToRender.length} PAIRS</div>
       <div class="meter"><div class="fill" style="width:100%"></div></div>
       <div class="foot">
         <span class="spot">${scan?.markets_evaluated ?? '-'} mkt</span>
@@ -1621,9 +1551,32 @@
       </div>`;
     grid.appendChild(statsCol);
 
+    // Compute per-asset today P&L to tint the LED dot
+    const todayUTC = new Date().toISOString().slice(0, 10);
+    const perAssetPnl = new Map();
+    for (const t of trades || []) {
+      if (!t.action || !t.action.startsWith('exit')) continue;
+      if (!t.opened_at || !t.opened_at.startsWith(todayUTC)) continue;
+      const key = String(t.asset || '').toUpperCase();
+      perAssetPnl.set(key, (perAssetPnl.get(key) || 0) + Number(t.realized_pnl_usd || 0));
+    }
+    assetsToRender.forEach((a, i) => {
+      const pnl = perAssetPnl.get(a.key);
+      const col = cols[i].col;
+      if (pnl === undefined) {
+        col.classList.add('pnl-flat');
+      } else if (pnl > 0.01) {
+        col.classList.add('pnl-pos');
+      } else if (pnl < -0.01) {
+        col.classList.add('pnl-neg');
+      } else {
+        col.classList.add('pnl-flat');
+      }
+    });
+
     // Apply resolved spots from Coinbase
     const spots = await Promise.all(spotPromises);
-    ASSETS.forEach((a, i) => {
+    assetsToRender.forEach((a, i) => {
       const spot = spots[i];
       const col = cols[i].col;
       const cell = col.querySelector('.spot');
