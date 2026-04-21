@@ -176,6 +176,8 @@
     color: #00ff00;
     letter-spacing: 2px;
   }
+  .lcd-top .nowplaying { cursor: pointer; user-select: none; }
+  .lcd-top .nowplaying:active { filter: brightness(1.4); }
   .lcd-top .nowplaying {
     font-size: 14px;
     color: #ffcc00;
@@ -332,6 +334,16 @@
     fill: url(#sparkGrad);
     opacity: 0.6;
   }
+  /* Trade-markers on sparkline — colored by exit reason */
+  .sparkline .marker {
+    r: 1.6;
+    stroke: #000; stroke-width: 0.3;
+  }
+  .sparkline .marker.tp        { fill: #00ff66; filter: drop-shadow(0 0 1px #00ff66); }
+  .sparkline .marker.sl        { fill: #ff4466; filter: drop-shadow(0 0 1px #ff4466); }
+  .sparkline .marker.time      { fill: #ffaa00; filter: drop-shadow(0 0 1px #ffaa00); }
+  .sparkline .marker.time_early{ fill: #ff88cc; filter: drop-shadow(0 0 1px #ff88cc); }
+  .sparkline .marker.default   { fill: #7a9aff; filter: drop-shadow(0 0 1px #7a9aff); }
   .sparkline .dot {
     fill: #00ff00;
     filter: drop-shadow(0 0 3px #00ff00);
@@ -633,8 +645,10 @@
     border: 1px solid #444;
     color: #aaa;
     font-family: inherit;
-    font-size: 12px;
-    padding: 4px 8px;
+    font-size: 14px;
+    padding: 8px 14px;
+    min-width: 44px;
+    min-height: 40px;
     cursor: pointer;
   }
   .detail-drawer .dd-close:hover { color: #fff; border-color: #fff; }
@@ -688,7 +702,50 @@
     padding: 2px 5px;
     border: 1px solid #1a2a3a;
   }
-  .detail-drawer .dd-empty {
+  .detail-drawer .info-section {
+    margin-bottom: 12px;
+  }
+  .detail-drawer .info-section h4 {
+    font-size: 7px;
+    color: #7a9aff;
+    letter-spacing: 1px;
+    margin: 8px 0 6px;
+    text-transform: uppercase;
+    font-weight: normal;
+  }
+  .detail-drawer .info-kv {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 4px 8px;
+    font-size: 8px;
+    color: #aaa;
+    padding: 4px 6px;
+    background: #000;
+    border: 1px solid #1a2a3a;
+    margin-bottom: 3px;
+  }
+  .detail-drawer .info-kv b {
+    color: #00ffff;
+    font-weight: normal;
+    font-variant-numeric: tabular-nums;
+  }
+  .detail-drawer .info-event {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 6px;
+    padding: 3px 5px;
+    font-size: 8px;
+    color: #ccc;
+    border-left: 2px solid #1a2a3a;
+    margin-bottom: 2px;
+  }
+  .detail-drawer .info-event.ok  { border-left-color: #00ff66; }
+  .detail-drawer .info-event.bad { border-left-color: #ff4466; }
+  .detail-drawer .info-event.wait{ border-left-color: #ffaa00; }
+  .detail-drawer .info-event .t-time { color: #7a9aff; }
+  .detail-drawer .info-event .t-body { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .detail-drawer .info-event .t-tail { color: #ccc; font-variant-numeric: tabular-nums; }
+    .detail-drawer .dd-empty {
     text-align: center;
     color: #555;
     font-size: 9px;
@@ -931,11 +988,20 @@
     .stat-val { font-size: 17px; }
     .countdown-val { font-size: 20px; }
     .eq-grid { grid-template-columns: repeat(2, 1fr); gap: 4px; }
-    .eq-col { min-height: 64px; padding: 5px 6px; }
+    .eq-col { min-height: 68px; padding: 5px 6px; }
     .eq-col .sym { font-size: 8px; }
     .eq-col .bracket { font-size: 11px; }
     .eq-col .spot { font-size: 10px; }
     .eq-col .meta { font-size: 9px; }
+    .eq-col .tier { font-size: 6px; margin-right: 3px; }
+    .risk-bar { font-size: 6px; padding: 4px 6px 5px; }
+    .risk-bar-track { height: 4px; }
+    .detail-drawer { padding: 12px 12px 20px; max-height: 70vh; }
+    .detail-drawer .dd-title { font-size: 12px; }
+    .detail-drawer .dd-stats { grid-template-columns: repeat(4, 1fr); gap: 3px; }
+    .detail-drawer .dd-stat .val { font-size: 12px; }
+    .detail-drawer .info-kv { font-size: 9px; padding: 5px 6px; }
+    .detail-drawer .info-event { font-size: 9px; }
     .pl-table { font-size: 13px; }
     .pl-table thead td { font-size: 10px; }
     .pl-table td { padding: 3px 4px; }
@@ -944,6 +1010,10 @@
     .hero-val { font-size: 28px; }
     .stat-val { font-size: 15px; }
     .stat-lbl { font-size: 6px; }
+    /* At very small widths, 4-col stats row gets cramped → 2x2 */
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+    .detail-drawer .dd-stats { grid-template-columns: repeat(2, 1fr); }
+    .risk-bar { font-size: 6px; }
   }
 
   /* Flicker overlay */
@@ -1122,6 +1192,13 @@
 
 <!-- Asset Detail Drawer (slide-up on tile tap) -->
 <div class="detail-backdrop" id="detail-backdrop"></div>
+<aside class="detail-drawer" id="info-drawer" aria-hidden="true">
+  <div class="dd-head">
+    <div class="dd-title" id="info-title">● BOT STATE</div>
+    <button class="dd-close" id="info-close" aria-label="Close">✕</button>
+  </div>
+  <div id="info-content"></div>
+</aside>
 <aside class="detail-drawer" id="detail-drawer" aria-hidden="true">
   <div class="dd-head">
     <div class="dd-title" id="dd-title">—</div>
@@ -1427,7 +1504,7 @@
     try {
       // Pull scans (run equivalent), trades, config
       const [scans, trades, config] = await Promise.all([
-        sb('crypto_scans?select=*&order=scan_at.desc&limit=60'),
+        sb('crypto_scans?select=*&order=scan_at.desc&limit=180'),
         sb('crypto_trades?select=*&order=opened_at.desc&limit=100'),
         sb('crypto_bot_config?select=key,value'),
       ]);
@@ -1444,12 +1521,17 @@
         .map(k => ASSETS.find(a => a.key === k))
         .filter(Boolean);
 
+      // Capture for Info-Drawer (tap on status-line)
+      _lastConfig = configMap;
+      _lastTrades = trades;
+      _lastScans  = scans;
+
       renderKillSwitch(configMap);
       renderHeader(latestScan, trades, scans);
       renderRiskBar(configMap, trades, latestScan);
       await renderAssets(trades, latestScan, activeAssets);
       renderPlaylist(trades);
-      renderSparkline(scans);
+      renderSparkline(scans, trades);
       applyMood(deriveMood(latestScan, trades));
 
       $('source').textContent = '⟩ last: ' + hhmm(new Date());
@@ -1935,17 +2017,18 @@
   }
 
   // ================== SPARKLINE (cash_before_usd over scans, oldest→newest) ==================
-  function renderSparkline(scans) {
+  function renderSparkline(scans, trades) {
     const svg = $('sparkline');
     const empty = $('sparklineEmpty');
-    svg.querySelectorAll('.line,.area,.dot').forEach(n => n.remove());
+    svg.querySelectorAll('.line,.area,.dot,.marker').forEach(n => n.remove());
     if (!scans || scans.length < 2) {
       empty.style.display = 'flex';
       return;
     }
     empty.style.display = 'none';
     // scans arrive newest-first; reverse for chronological plot
-    const pts = scans.slice().reverse().map(s => Number(s.cash_before_usd)).filter(Number.isFinite);
+    const chrono = scans.slice().reverse();
+    const pts = chrono.map(s => Number(s.cash_before_usd)).filter(Number.isFinite);
     if (pts.length < 2) { empty.style.display = 'flex'; return; }
     const min = Math.min(...pts);
     const max = Math.max(...pts);
@@ -1977,6 +2060,46 @@
     dot.setAttribute('cy', last[1]);
     dot.setAttribute('r', '1.5');
     svg.appendChild(dot);
+
+    // ---- Trade-Markers: map each today-exit to nearest scan by time ----
+    if (trades && trades.length && chrono.length > 1) {
+      const firstT = new Date(chrono[0].scan_at).getTime();
+      const lastT  = new Date(chrono[chrono.length - 1].scan_at).getTime();
+      const tRange = lastT - firstT || 1;
+      const exits = (trades || []).filter(t =>
+        t.action && t.action.startsWith('exit') &&
+        (t.closed_at || t.opened_at)
+      );
+      for (const t of exits) {
+        const ts = new Date(t.closed_at || t.opened_at).getTime();
+        if (ts < firstT - 20_000 || ts > lastT + 20_000) continue; // out of window
+        const frac = Math.max(0, Math.min(1, (ts - firstT) / tRange));
+        const x = frac * W;
+        // Interpolate y from coords
+        const pos = frac * (n - 1);
+        const i0 = Math.floor(pos);
+        const i1 = Math.min(n - 1, i0 + 1);
+        const t01 = pos - i0;
+        const y = coords[i0][1] * (1 - t01) + coords[i1][1] * t01;
+
+        const reason = (t.notes && t.notes.match(/reason=(\w+)/)?.[1] || '')
+                       .toLowerCase() || (t.action || '').replace('exit_', '');
+        const cls = /^tp$/.test(reason) ? 'tp'
+                  : /^sl$/.test(reason) ? 'sl'
+                  : reason === 'time' ? 'time'
+                  : reason === 'time_early' ? 'time_early'
+                  : 'default';
+        const mk = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        mk.setAttribute('class', 'marker ' + cls);
+        mk.setAttribute('cx', x.toFixed(2));
+        mk.setAttribute('cy', y.toFixed(2));
+        mk.setAttribute('r', '1.6');
+        const pnl = Number(t.realized_pnl_usd || 0);
+        const hh = (t.closed_at || t.opened_at).slice(11, 16);
+        mk.innerHTML = `<title>${hh} · ${t.asset || ''} ${t.side || ''} · ${cls.toUpperCase()} · ${pnl >= 0 ? '+$' : '-$'}${Math.abs(pnl).toFixed(2)}</title>`;
+        svg.appendChild(mk);
+      }
+    }
   }
 
   // ================== CHIPTUNE (Web Audio) — faster, more "trading-floor" ==================
@@ -2120,6 +2243,93 @@
     bg.classList.add('open');
   }
 
+
+  // ================== INFO DRAWER (bot state + thresholds + events) ==================
+  // Uses globals from last loadData() pass — captured on load.
+  let _lastConfig = {};
+  let _lastTrades = [];
+  let _lastScans  = [];
+
+  function openInfoDrawer() {
+    const drawer = $('info-drawer');
+    const bg     = $('detail-backdrop');
+    const content = $('info-content');
+    const title = $('info-title');
+    if (!drawer || !content) return;
+
+    // Build Bot-State section
+    const cfg = _lastConfig || {};
+    const fmtPct = v => (Number(v) * 100).toFixed(v > 0.01 ? 2 : 3) + '%';
+    const bot = cfg.bot_enabled === 'true' ? '● LIVE' : '■ OFF';
+    const pu = String(cfg.pause_until || '').trim();
+    const puStr = pu ? new Date(pu).toISOString().slice(11, 19) + ' UTC' : '—';
+    const sp = cfg.streak_pauses_today ?? '0';
+    const maxSp = cfg.max_streak_pauses_per_day ?? '3';
+
+    title.textContent = bot === '● LIVE' ? '● BOT STATE' : '■ BOT STATE';
+
+    // Events from today's trades (newest first, max 10)
+    const todayUTC = new Date().toISOString().slice(0, 10);
+    const events = (_lastTrades || [])
+      .filter(t => t.opened_at && t.opened_at.startsWith(todayUTC))
+      .slice(0, 10)
+      .map(t => {
+        const time = t.opened_at.slice(11, 16);
+        const asset = t.asset || '';
+        const side = t.side || '';
+        const isExit = t.action && t.action.startsWith('exit');
+        const pnl = Number(t.realized_pnl_usd || 0);
+        const reason = (t.notes && t.notes.match(/reason=(\w+)/)?.[1]) || t.action?.replace('exit_','').toUpperCase() || '—';
+        let cls = 'wait';
+        if (isExit) cls = pnl > 0 ? 'ok' : 'bad';
+        else if (t.action === 'entry') cls = 'ok';
+        const body = isExit ? (asset + ' ' + side + ' · ' + reason) : ('ENTRY ' + asset + ' ' + side + ' @' + (t.price_cents || '-') + '¢');
+        const tail = isExit ? ((pnl >= 0 ? '+$' : '-$') + fmt(Math.abs(pnl))) : ('$' + fmt(Number(t.cost_usd || 0)));
+        return { time, cls, body, tail };
+      });
+
+    const eventsHTML = events.length
+      ? events.map(e => `<div class="info-event ${e.cls}"><span class="t-time">${e.time}</span><span class="t-body">${e.body}</span><span class="t-tail">${e.tail}</span></div>`).join('')
+      : '<div class="dd-empty">keine Trades heute</div>';
+
+    content.innerHTML = `
+      <div class="info-section">
+        <h4>BOT STATE</h4>
+        <div class="info-kv"><span>Status</span><b>${bot}</b></div>
+        <div class="info-kv"><span>Pause bis</span><b>${puStr}</b></div>
+        <div class="info-kv"><span>Streak-Pausen heute</span><b>${sp} / ${maxSp}</b></div>
+        <div class="info-kv"><span>Assets aktiv</span><b>${(cfg.assets || '—').split(',').length}</b></div>
+      </div>
+      <div class="info-section">
+        <h4>AKTIVE LIMITS</h4>
+        <div class="info-kv"><span>Min Edge</span><b>${fmtPct(cfg.min_edge_pct ?? 0.15)}</b></div>
+        <div class="info-kv"><span>Min Target-Distance</span><b>${fmtPct(cfg.min_target_distance_pct ?? 0.0015)}</b></div>
+        <div class="info-kv"><span>Min Model-Prob</span><b>${Math.round(Number(cfg.min_model_prob ?? 0.54) * 100)}%</b></div>
+        <div class="info-kv"><span>Max Position</span><b>$${fmt(Number(cfg.max_position_usd ?? 2))}</b></div>
+        <div class="info-kv"><span>Max Positionen / Asset</span><b>${cfg.max_positions_per_asset ?? 1}</b></div>
+        <div class="info-kv"><span>Daily Loss Limit</span><b>-$${fmt(Math.abs(Number(cfg.daily_loss_limit_usd ?? 5)))}</b></div>
+        <div class="info-kv"><span>Max Daily Trades</span><b>${cfg.max_daily_trades ?? 20}</b></div>
+      </div>
+      <div class="info-section">
+        <h4>LETZTE EVENTS (HEUTE)</h4>
+        ${eventsHTML}
+      </div>
+    `;
+
+    drawer.classList.add('open');
+    drawer.setAttribute('aria-hidden', 'false');
+    bg.classList.add('open');
+  }
+
+  function closeInfoDrawer() {
+    const drawer = $('info-drawer');
+    const bg     = $('detail-backdrop');
+    const asset  = $('detail-drawer');
+    if (drawer) { drawer.classList.remove('open'); drawer.setAttribute('aria-hidden', 'true'); }
+    // only clear backdrop if asset-drawer is not open
+    if (bg && !asset?.classList.contains('open')) bg.classList.remove('open');
+  }
+
   function closeAssetDrawer() {
     const drawer = $('detail-drawer');
     const bg     = $('detail-backdrop');
@@ -2132,8 +2342,13 @@
     const close = $('dd-close');
     const bg    = $('detail-backdrop');
     if (close) close.addEventListener('click', closeAssetDrawer);
-    if (bg)    bg.addEventListener('click', closeAssetDrawer);
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeAssetDrawer(); });
+    if (bg)    bg.addEventListener('click', () => { closeAssetDrawer(); closeInfoDrawer(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeAssetDrawer(); closeInfoDrawer(); } });
+
+    const np = $('nowplaying');
+    if (np) np.addEventListener('click', openInfoDrawer);
+    const ic = $('info-close');
+    if (ic) ic.addEventListener('click', closeInfoDrawer);
   });
 
   loadData();
